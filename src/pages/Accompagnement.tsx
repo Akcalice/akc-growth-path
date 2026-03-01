@@ -9,6 +9,7 @@ const poleColors = ["bg-gold-light", "bg-accent", "bg-secondary"];
 const Accompagnement = () => {
   const { content } = useCmsContent();
   const page = content.accompagnementPage;
+  const calendlyUrl = content.site.calendlyUrl;
 
   return (
     <Layout>
@@ -56,9 +57,14 @@ const Accompagnement = () => {
         </div>
 
         <div className="text-center mt-16">
-          <Link to="/rendez-vous" className="inline-flex items-center px-8 py-4 rounded-full bg-primary text-primary-foreground font-semibold hover:bg-navy-light transition-colors">
+          <a
+            href={calendlyUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center px-8 py-4 rounded-full bg-primary text-primary-foreground font-semibold hover:bg-navy-light transition-colors"
+          >
             {page.ctaLabel} <ArrowRight size={18} className="ml-2" />
-          </Link>
+          </a>
         </div>
       </div>
     </section>

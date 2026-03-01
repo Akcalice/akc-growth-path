@@ -19,7 +19,9 @@ const Prix = () => {
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {page.plans.map((plan, i) => (
+          {page.plans.map((plan, i) => {
+            const isExternalCta = /^https?:\/\//.test(plan.ctaLink);
+            return (
             <div
               key={i}
               className={`rounded-2xl p-7 flex flex-col ${
@@ -42,18 +44,34 @@ const Prix = () => {
                 ))}
               </ul>
 
-              <Link
-                to={plan.ctaLink}
-                className={`block text-center px-6 py-3 rounded-full font-semibold text-sm transition-colors ${
-                  plan.featured
-                    ? "bg-primary-foreground text-primary hover:bg-primary-foreground/90"
-                    : "bg-primary text-primary-foreground hover:bg-navy-light"
-                }`}
-              >
-                {plan.ctaLabel}
-              </Link>
+              {isExternalCta ? (
+                <a
+                  href={plan.ctaLink}
+                  target="_blank"
+                  rel="noreferrer"
+                  className={`block text-center px-6 py-3 rounded-full font-semibold text-sm transition-colors ${
+                    plan.featured
+                      ? "bg-primary-foreground text-primary hover:bg-primary-foreground/90"
+                      : "bg-primary text-primary-foreground hover:bg-navy-light"
+                  }`}
+                >
+                  {plan.ctaLabel}
+                </a>
+              ) : (
+                <Link
+                  to={plan.ctaLink}
+                  className={`block text-center px-6 py-3 rounded-full font-semibold text-sm transition-colors ${
+                    plan.featured
+                      ? "bg-primary-foreground text-primary hover:bg-primary-foreground/90"
+                      : "bg-primary text-primary-foreground hover:bg-navy-light"
+                  }`}
+                >
+                  {plan.ctaLabel}
+                </Link>
+              )}
             </div>
-          ))}
+          );
+          })}
         </div>
       </div>
     </section>

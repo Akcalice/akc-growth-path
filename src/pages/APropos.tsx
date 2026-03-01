@@ -9,6 +9,7 @@ const valueIcons = [Heart, Target, Users, BookOpen];
 const APropos = () => {
   const { content } = useCmsContent();
   const about = content.about;
+  const calendlyUrl = content.site.calendlyUrl;
   const portraitImage =
     imageMap[about.portraitImageKey as keyof typeof imageMap] ?? imageMap.consultantPortrait;
   const methodologyImage =
@@ -32,9 +33,14 @@ const APropos = () => {
             <p className="text-muted-foreground leading-relaxed mb-8">
               {about.paragraph2}
             </p>
-            <Link to="/rendez-vous" className="inline-flex items-center px-8 py-4 rounded-full bg-primary text-primary-foreground font-semibold hover:bg-navy-light transition-colors">
+            <a
+              href={calendlyUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center px-8 py-4 rounded-full bg-primary text-primary-foreground font-semibold hover:bg-navy-light transition-colors"
+            >
               {about.ctaLabel}
-            </Link>
+            </a>
           </div>
           <div className="rounded-2xl overflow-hidden shadow-lg">
             <img src={portraitImage} alt="La fondatrice d'AKC Gestion Conseils" className="w-full object-cover" />

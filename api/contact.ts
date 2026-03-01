@@ -35,9 +35,11 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
   const toEmail = process.env.CONTACT_TO_EMAIL;
 
   if (!resendApiKey || !fromEmail || !toEmail) {
-    return res.status(500).json({
+    return res.status(200).json({
+      success: false,
+      fallback: true,
       error:
-        "Configuration email incomplete. Definir RESEND_API_KEY, RESEND_FROM_EMAIL et CONTACT_TO_EMAIL.",
+        "Configuration email incomplete. Definir RESEND_API_KEY, RESEND_FROM_EMAIL et CONTACT_TO_EMAIL dans Vercel.",
     });
   }
 

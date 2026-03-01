@@ -9,14 +9,16 @@ const Navbar = () => {
   const { content } = useCmsContent();
   const navLinks = content.navbar.links;
   const logoPath = content.site.logoPath || "/logo-akc.svg";
+  const logoSrc = `${logoPath}${logoPath.includes("?") ? "&" : "?"}v=9`;
+  const calendlyUrl = content.site.calendlyUrl;
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-md border-b border-border">
       <nav className="container flex items-center justify-between h-16 md:h-20">
         <Link to="/" className="flex items-center gap-2" aria-label="Retour à l'accueil AKC">
           <img
-            src={logoPath}
-            alt="Logo AKC Gestion Conseils"
+            src={logoSrc}
+            alt={`Logo ${content.site.companyName}`}
             className="h-9 md:h-11 w-auto"
             loading="eager"
           />
@@ -39,12 +41,14 @@ const Navbar = () => {
           ))}
         </div>
 
-        <Link
-          to="/rendez-vous"
+        <a
+          href={calendlyUrl}
+          target="_blank"
+          rel="noreferrer"
           className="hidden md:inline-flex items-center px-6 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-semibold hover:bg-navy-light transition-colors"
         >
           {content.navbar.ctaLabel}
-        </Link>
+        </a>
 
         {/* Mobile toggle */}
         <button
@@ -73,13 +77,15 @@ const Navbar = () => {
                 {link.label}
               </Link>
             ))}
-            <Link
-              to="/rendez-vous"
+            <a
+              href={calendlyUrl}
+              target="_blank"
+              rel="noreferrer"
               onClick={() => setMobileOpen(false)}
               className="mt-2 px-6 py-3 rounded-full bg-primary text-primary-foreground text-sm font-semibold text-center"
             >
               {content.navbar.ctaLabel}
-            </Link>
+            </a>
           </div>
         </div>
       )}

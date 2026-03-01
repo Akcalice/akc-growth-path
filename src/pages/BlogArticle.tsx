@@ -15,6 +15,7 @@ const formatBlogDate = (date: string) =>
 const BlogArticle = () => {
   const { content } = useCmsContent();
   const blog = content.blog;
+  const calendlyUrl = content.site.calendlyUrl;
   const { slug = "" } = useParams();
   const article = blog.posts.find((post) => post.slug === slug);
 
@@ -163,12 +164,14 @@ const BlogArticle = () => {
             <p className="text-muted-foreground mb-6">
               {blog.articleCtaDescription}
             </p>
-            <Link
-              to="/rendez-vous"
+            <a
+              href={calendlyUrl}
+              target="_blank"
+              rel="noreferrer"
               className="inline-flex items-center px-7 py-3 rounded-full bg-primary text-primary-foreground font-semibold hover:bg-navy-light transition-colors"
             >
               {blog.articleCtaLabel}
-            </Link>
+            </a>
           </div>
         </div>
       </article>

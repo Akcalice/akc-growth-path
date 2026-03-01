@@ -5,6 +5,8 @@ import { useCmsContent } from "@/context/CmsContentContext";
 const Footer = () => {
   const { content } = useCmsContent();
   const logoPath = content.site.logoPath || "/logo-akc.svg";
+  const logoSrc = `${logoPath}${logoPath.includes("?") ? "&" : "?"}v=9`;
+  const calendlyUrl = content.site.calendlyUrl;
 
   return (
     <footer className="bg-primary text-primary-foreground">
@@ -13,7 +15,7 @@ const Footer = () => {
           <div>
             <Link to="/" className="inline-flex mb-4" aria-label="Retour à l'accueil AKC">
               <img
-                src={logoPath}
+                src={logoSrc}
                 alt={`Logo ${content.site.companyName}`}
                 className="h-11 w-auto"
                 loading="lazy"
@@ -56,12 +58,14 @@ const Footer = () => {
             <p className="text-sm text-primary-foreground/70 mb-4">
               {content.footer.appointmentDescription}
             </p>
-            <Link
-              to="/rendez-vous"
+            <a
+              href={calendlyUrl}
+              target="_blank"
+              rel="noreferrer"
               className="inline-flex px-6 py-2.5 rounded-full bg-primary-foreground text-primary text-sm font-semibold hover:bg-primary-foreground/90 transition-colors"
             >
               {content.footer.appointmentCtaLabel}
-            </Link>
+            </a>
           </div>
         </div>
         <div className="border-t border-primary-foreground/10 mt-12 pt-8 text-center text-sm text-primary-foreground/50 space-y-1">

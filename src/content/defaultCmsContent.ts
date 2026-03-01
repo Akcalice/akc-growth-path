@@ -29,6 +29,7 @@ export type CmsContent = {
     ogImage: string;
     logoPath: string;
     faviconPath: string;
+    calendlyUrl: string;
     contactEmail: string;
     location: string;
   };
@@ -198,6 +199,7 @@ export const defaultCmsContent: CmsContent = {
     ogImage: "/logo-akc.svg",
     logoPath: "/logo-akc.svg",
     faviconPath: "/favicon-akconseil.svg",
+    calendlyUrl: "https://calendly.com/contact-akconseil/appel-d-offre",
     contactEmail: "contact@akconseil.fr",
     location: "France",
   },
@@ -482,7 +484,7 @@ export const defaultCmsContent: CmsContent = {
         featured: true,
         features: ["Session 1h", "Suivi progressif", "Objectifs sur-mesure"],
         ctaLabel: "Prendre RDV",
-        ctaLink: "/rendez-vous",
+        ctaLink: "https://calendly.com/contact-akconseil/appel-d-offre",
       },
       {
         title: "Seance initiale",
@@ -494,7 +496,7 @@ export const defaultCmsContent: CmsContent = {
           "Conseils adaptes + suivi",
         ],
         ctaLabel: "Prendre RDV",
-        ctaLink: "/rendez-vous",
+        ctaLink: "https://calendly.com/contact-akconseil/appel-d-offre",
       },
       {
         title: "Ateliers & Entreprises",
@@ -506,7 +508,7 @@ export const defaultCmsContent: CmsContent = {
           "Supports pedagogiques inclus",
         ],
         ctaLabel: "Prendre RDV",
-        ctaLink: "/rendez-vous",
+        ctaLink: "https://calendly.com/contact-akconseil/appel-d-offre",
       },
       {
         title: "Ateliers & Entreprises",
@@ -544,7 +546,7 @@ export const defaultCmsContent: CmsContent = {
           "Proposition de suivi",
         ],
         ctaLabel: "Reserver",
-        ctaLink: "/contact",
+        ctaLink: "https://calendly.com/contact-akconseil/appel-d-offre",
       },
       {
         title: "Seance individuelle",
@@ -555,7 +557,7 @@ export const defaultCmsContent: CmsContent = {
         features: ["Suivi personnalise", "Outils concrets", "Bilan de progression"],
         popular: true,
         ctaLabel: "Reserver",
-        ctaLink: "/contact",
+        ctaLink: "https://calendly.com/contact-akconseil/appel-d-offre",
       },
       {
         title: "Forfait accompagnement",
@@ -568,7 +570,7 @@ export const defaultCmsContent: CmsContent = {
           "Support entre les seances",
         ],
         ctaLabel: "Reserver",
-        ctaLink: "/contact",
+        ctaLink: "https://calendly.com/contact-akconseil/appel-d-offre",
       },
     ],
     formatsTitle: "Formats de consultation",

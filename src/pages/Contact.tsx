@@ -8,8 +8,23 @@ const Contact = () => {
   const { toast } = useToast();
   const { content } = useCmsContent();
   const page = content.contactPage;
+  const calendlyUrl = content.site.calendlyUrl;
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const buildMailtoFallback = () => {
+    const fallbackSubject = encodeURIComponent(`[Contact site] ${form.subject || "Nouveau message"}`);
+    const fallbackBody = encodeURIComponent(
+      [
+        `Nom: ${form.name}`,
+        `Email: ${form.email}`,
+        "",
+        "Message:",
+        form.message,
+      ].join("\n"),
+    );
+    return `mailto:${content.site.contactEmail}?subject=${fallbackSubject}&body=${fallbackBody}`;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,12 +39,37 @@ const Contact = () => {
       });
 
       if (!response.ok) {
-        const errorPayload = await response.json().catch(() => ({}));
+        const errorPayload = (await response.json().catch(() => ({}))) as {
+          error?: string;
+          fallback?: boolean;
+        };
         const message =
-          typeof errorPayload?.error === "string"
+          typeof errorPayload.error === "string"
             ? errorPayload.error
             : page.form.errorDescription;
+        if (errorPayload.fallback) {
+          window.location.href = buildMailtoFallback();
+          toast({
+            title: page.form.errorTitle,
+            description:
+              "La configuration email serveur est incomplete. Un email pre-rempli va s'ouvrir dans votre messagerie.",
+          });
+          return;
+        }
         throw new Error(message);
+      }
+
+      const payload = (await response.json().catch(() => ({}))) as {
+        fallback?: boolean;
+      };
+      if (payload.fallback) {
+        window.location.href = buildMailtoFallback();
+        toast({
+          title: page.form.errorTitle,
+          description:
+            "Le service email est indisponible temporairement. Un email pre-rempli va s'ouvrir dans votre messagerie.",
+        });
+        return;
       }
 
       toast({
@@ -38,10 +78,13 @@ const Contact = () => {
       });
       setForm({ name: "", email: "", subject: "", message: "" });
     } catch (error) {
+      window.location.href = buildMailtoFallback();
       toast({
         title: page.form.errorTitle,
         description:
-          error instanceof Error ? error.message : page.form.errorDescription,
+          error instanceof Error
+            ? `${error.message} Un email pre-rempli va s'ouvrir dans votre messagerie.`
+            : "Une erreur est survenue. Un email pre-rempli va s'ouvrir dans votre messagerie.",
       });
     } finally {
       setIsSubmitting(false);
@@ -141,6 +184,14 @@ const Contact = () => {
                 <h3 className="font-display text-lg font-bold mb-3">{page.hoursTitle}</h3>
                 <p className="text-muted-foreground text-sm mb-2">{page.hoursWeekdays}</p>
                 <p className="text-muted-foreground text-sm">{page.hoursSaturday}</p>
+                <a
+                  href={calendlyUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex mt-5 px-5 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-semibold hover:bg-navy-light transition-colors"
+                >
+                  Prendre RDV sur Calendly
+                </a>
               </div>
             </div>
           </div>

@@ -15,6 +15,9 @@ const serviceIcons = [GraduationCap, Users, Briefcase];
 const Index = () => {
   const { content } = useCmsContent();
   const home = content.home;
+  const calendlyUrl = content.site.calendlyUrl;
+  const logoPath = content.site.logoPath || "/logo-akc.svg";
+  const logoSrc = `${logoPath}${logoPath.includes("?") ? "&" : "?"}v=9`;
 
   return (
     <Layout>
@@ -22,6 +25,12 @@ const Index = () => {
     <section className="relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-accent/80 via-accent/40 to-background" />
       <div className="container relative py-20 md:py-32 text-center">
+        <img
+          src={logoSrc}
+          alt={`Logo ${content.site.companyName}`}
+          className="h-14 md:h-16 w-auto mx-auto mb-7"
+          loading="eager"
+        />
         <div className="inline-flex items-center px-5 py-2 rounded-full bg-gold-light text-foreground text-xs font-semibold tracking-wider uppercase mb-8 animate-fade-in">
           {home.heroBadge}
         </div>
@@ -34,9 +43,14 @@ const Index = () => {
           {home.heroDescription}
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center" style={{ animationDelay: "0.3s" }}>
-          <Link to="/rendez-vous" className="inline-flex items-center justify-center px-8 py-4 rounded-full bg-primary text-primary-foreground font-semibold hover:bg-navy-light transition-colors">
+          <a
+            href={calendlyUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center justify-center px-8 py-4 rounded-full bg-primary text-primary-foreground font-semibold hover:bg-navy-light transition-colors"
+          >
             {home.heroPrimaryCta}
-          </Link>
+          </a>
           <Link to="/services" className="inline-flex items-center justify-center px-8 py-4 rounded-full bg-secondary text-secondary-foreground font-semibold hover:bg-cream-dark transition-colors">
             {home.heroSecondaryCta} <ChevronRight size={18} className="ml-1" />
           </Link>
@@ -137,9 +151,14 @@ const Index = () => {
               {home.whyTagline}
             </span>
             <h3 className="font-display text-3xl md:text-4xl font-bold mb-6">{home.whyCardTitle}</h3>
-            <Link to="/rendez-vous" className="inline-flex items-center px-8 py-4 rounded-full bg-primary text-primary-foreground font-semibold hover:bg-navy-light transition-colors">
+            <a
+              href={calendlyUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center px-8 py-4 rounded-full bg-primary text-primary-foreground font-semibold hover:bg-navy-light transition-colors"
+            >
               {home.whyCtaLabel}
-            </Link>
+            </a>
           </div>
         </div>
       </div>
@@ -200,9 +219,14 @@ const Index = () => {
         <p className="text-muted-foreground text-lg mb-8 max-w-lg mx-auto">
           {home.finalCtaDescription}
         </p>
-        <Link to="/rendez-vous" className="inline-flex items-center px-8 py-4 rounded-full bg-primary text-primary-foreground font-semibold hover:bg-navy-light transition-colors">
+        <a
+          href={calendlyUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center px-8 py-4 rounded-full bg-primary text-primary-foreground font-semibold hover:bg-navy-light transition-colors"
+        >
           {home.finalCtaLabel} <ArrowRight size={18} className="ml-2" />
-        </Link>
+        </a>
       </div>
     </section>
   </Layout>
