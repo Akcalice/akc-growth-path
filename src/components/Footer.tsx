@@ -6,9 +6,14 @@ const Footer = () => (
     <div className="container py-16">
       <div className="grid md:grid-cols-4 gap-10">
         <div>
-          <span className="w-12 h-12 rounded-full bg-primary-foreground/10 flex items-center justify-center font-display text-lg font-bold mb-4">
-            AKC
-          </span>
+          <Link to="/" className="inline-flex mb-4" aria-label="Retour à l'accueil AKC">
+            <img
+              src="/logo-akc.svg"
+              alt="Logo AKC Gestion Conseils"
+              className="h-11 w-auto"
+              loading="lazy"
+            />
+          </Link>
           <p className="text-primary-foreground/70 text-sm leading-relaxed">
             Accompagnement éducatif, social et professionnel sur-mesure. Aller au rythme de la personne accompagnée.
           </p>

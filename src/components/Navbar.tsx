@@ -19,10 +19,13 @@ const Navbar = () => {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-md border-b border-border">
       <nav className="container flex items-center justify-between h-16 md:h-20">
-        <Link to="/" className="flex items-center gap-2">
-          <span className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-display text-sm md:text-base font-bold">
-            AKC
-          </span>
+        <Link to="/" className="flex items-center gap-2" aria-label="Retour à l'accueil AKC">
+          <img
+            src="/logo-akc.svg"
+            alt="Logo AKC Gestion Conseils"
+            className="h-9 md:h-11 w-auto"
+            loading="eager"
+          />
         </Link>
 
         {/* Desktop */}

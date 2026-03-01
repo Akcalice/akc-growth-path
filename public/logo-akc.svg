@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 140" role="img" aria-labelledby="logoTitle logoDesc">
+  <title id="logoTitle">Logo AKC</title>
+  <desc id="logoDesc">Monogramme AKC en doré</desc>
+  <defs>
+    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F2E1B5" />
+      <stop offset="45%" stop-color="#DEC78F" />
+      <stop offset="100%" stop-color="#B99756" />
+    </linearGradient>
+  </defs>
+  <g fill="url(#goldGradient)">
+    <text
+      x="20"
+      y="104"
+      font-size="102"
+      font-weight="500"
+      letter-spacing="7"
+      font-family="'Playfair Display', Georgia, serif"
+    >
+      AKC
+    </text>
+    <polygon points="67,79 73,67 79,79" />
+    <polygon points="75,79 81,67 87,79" />
+    <polygon points="59,79 65,67 71,79" />
+  </g>
+</svg>
