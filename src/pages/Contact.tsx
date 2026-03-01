@@ -2,15 +2,50 @@ import Layout from "@/components/Layout";
 import { Mail, MapPin, Send } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useCmsContent } from "@/context/CmsContentContext";
 
 const Contact = () => {
   const { toast } = useToast();
+  const { content } = useCmsContent();
+  const page = content.contactPage;
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast({ title: "Message envoyé !", description: "Nous vous répondrons dans les meilleurs délais." });
-    setForm({ name: "", email: "", subject: "", message: "" });
+    try {
+      setIsSubmitting(true);
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
+      });
+
+      if (!response.ok) {
+        const errorPayload = await response.json().catch(() => ({}));
+        const message =
+          typeof errorPayload?.error === "string"
+            ? errorPayload.error
+            : page.form.errorDescription;
+        throw new Error(message);
+      }
+
+      toast({
+        title: page.form.successTitle,
+        description: page.form.successDescription,
+      });
+      setForm({ name: "", email: "", subject: "", message: "" });
+    } catch (error) {
+      toast({
+        title: page.form.errorTitle,
+        description:
+          error instanceof Error ? error.message : page.form.errorDescription,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -19,11 +54,11 @@ const Contact = () => {
         <div className="container">
           <div className="text-center max-w-2xl mx-auto mb-16">
             <span className="inline-flex items-center px-5 py-2 rounded-full bg-gold-light text-xs font-semibold tracking-wider uppercase mb-6">
-              Contact
+              {page.badge}
             </span>
-            <h1 className="font-display text-4xl md:text-5xl font-bold mb-6">Contactez-nous</h1>
+            <h1 className="font-display text-4xl md:text-5xl font-bold mb-6">{page.title}</h1>
             <p className="text-muted-foreground text-lg">
-              N'hésitez pas à nous écrire pour toute question ou demande de renseignement.
+              {page.intro}
             </p>
           </div>
 
@@ -31,80 +66,81 @@ const Contact = () => {
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label className="block text-sm font-medium mb-1.5">Nom complet</label>
+                <label className="block text-sm font-medium mb-1.5">{page.form.fullNameLabel}</label>
                 <input
                   type="text"
                   required
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   className="w-full px-4 py-3 rounded-xl border border-border bg-background focus:ring-2 focus:ring-ring focus:outline-none text-sm"
-                  placeholder="Votre nom"
+                  placeholder={page.form.fullNamePlaceholder}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1.5">Email</label>
+                <label className="block text-sm font-medium mb-1.5">{page.form.emailLabel}</label>
                 <input
                   type="email"
                   required
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                   className="w-full px-4 py-3 rounded-xl border border-border bg-background focus:ring-2 focus:ring-ring focus:outline-none text-sm"
-                  placeholder="votre@email.com"
+                  placeholder={page.form.emailPlaceholder}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1.5">Sujet</label>
+                <label className="block text-sm font-medium mb-1.5">{page.form.subjectLabel}</label>
                 <input
                   type="text"
                   required
                   value={form.subject}
                   onChange={(e) => setForm({ ...form, subject: e.target.value })}
                   className="w-full px-4 py-3 rounded-xl border border-border bg-background focus:ring-2 focus:ring-ring focus:outline-none text-sm"
-                  placeholder="Sujet de votre message"
+                  placeholder={page.form.subjectPlaceholder}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1.5">Message</label>
+                <label className="block text-sm font-medium mb-1.5">{page.form.messageLabel}</label>
                 <textarea
                   required
                   rows={5}
                   value={form.message}
                   onChange={(e) => setForm({ ...form, message: e.target.value })}
                   className="w-full px-4 py-3 rounded-xl border border-border bg-background focus:ring-2 focus:ring-ring focus:outline-none text-sm resize-none"
-                  placeholder="Votre message..."
+                  placeholder={page.form.messagePlaceholder}
                 />
               </div>
               <button
                 type="submit"
+                disabled={isSubmitting}
                 className="inline-flex items-center justify-center w-full px-8 py-4 rounded-full bg-primary text-primary-foreground font-semibold hover:bg-navy-light transition-colors"
               >
-                Envoyer <Send size={16} className="ml-2" />
+                {isSubmitting ? "Envoi..." : page.form.submitLabel} <Send size={16} className="ml-2" />
               </button>
             </form>
 
             {/* Info */}
             <div className="space-y-8">
               <div className="bg-accent/50 rounded-2xl p-8">
-                <h3 className="font-display text-xl font-bold mb-6">Informations de contact</h3>
+                <h3 className="font-display text-xl font-bold mb-6">{page.infoTitle}</h3>
                 <div className="space-y-4">
-                  <a href="mailto:contact@akconseil.fr" className="flex items-center gap-3 text-sm hover:text-navy-light transition-colors">
+                  <a href={`mailto:${content.site.contactEmail}`} className="flex items-center gap-3 text-sm hover:text-navy-light transition-colors">
                     <div className="w-10 h-10 rounded-full bg-gold-light flex items-center justify-center">
                       <Mail size={18} className="text-foreground" />
                     </div>
-                    contact@akconseil.fr
+                    {content.site.contactEmail}
                   </a>
                   <div className="flex items-center gap-3 text-sm">
                     <div className="w-10 h-10 rounded-full bg-gold-light flex items-center justify-center">
                       <MapPin size={18} className="text-foreground" />
                     </div>
-                    France
+                    {content.site.location}
                   </div>
                 </div>
               </div>
               <div className="bg-card rounded-2xl p-8">
-                <h3 className="font-display text-lg font-bold mb-3">Horaires</h3>
-                <p className="text-muted-foreground text-sm mb-2">Lundi - Vendredi : 9h - 18h</p>
-                <p className="text-muted-foreground text-sm">Samedi : Sur rendez-vous</p>
+                <h3 className="font-display text-lg font-bold mb-3">{page.hoursTitle}</h3>
+                <p className="text-muted-foreground text-sm mb-2">{page.hoursWeekdays}</p>
+                <p className="text-muted-foreground text-sm">{page.hoursSaturday}</p>
               </div>
             </div>
           </div>

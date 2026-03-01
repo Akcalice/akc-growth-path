@@ -1,37 +1,46 @@
 import Layout from "@/components/Layout";
 import Seo from "@/components/Seo";
-import { formatBlogDate, getBlogArticleBySlug } from "@/data/blogArticles";
 import { ArrowLeft, Calendar, Clock } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
+import { useCmsContent } from "@/context/CmsContentContext";
+import { imageMap } from "@/content/imageMap";
+
+const formatBlogDate = (date: string) =>
+  new Intl.DateTimeFormat("fr-FR", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  }).format(new Date(date));
 
 const BlogArticle = () => {
+  const { content } = useCmsContent();
+  const blog = content.blog;
   const { slug = "" } = useParams();
-  const article = getBlogArticleBySlug(slug);
+  const article = blog.posts.find((post) => post.slug === slug);
 
   if (!article) {
     return (
       <Layout>
         <Seo
-          title="Article introuvable | AKC Gestion Conseils"
-          description="L'article demande n'existe pas ou n'est plus disponible."
+          title={`${blog.notFoundTitle} | ${content.site.companyName}`}
+          description={blog.notFoundDescription}
           canonicalPath="/blog"
           noindex
         />
         <section className="py-20 md:py-28">
           <div className="container max-w-2xl text-center">
             <h1 className="font-display text-3xl md:text-4xl font-bold mb-4">
-              Article introuvable
+              {blog.notFoundTitle}
             </h1>
             <p className="text-muted-foreground mb-8">
-              Le contenu demande n'est pas disponible. Vous pouvez consulter les autres
-              articles du blog.
+              {blog.notFoundDescription}
             </p>
             <Link
               to="/blog"
               className="inline-flex items-center px-6 py-3 rounded-full bg-primary text-primary-foreground font-semibold hover:bg-navy-light transition-colors"
             >
               <ArrowLeft size={16} className="mr-2" />
-              Retour au blog
+              {blog.backToBlogLabel}
             </Link>
           </div>
         </section>
@@ -45,7 +54,8 @@ const BlogArticle = () => {
       : "https://akc-growth-path.vercel.app";
 
   const canonicalPath = `/blog/${article.slug}`;
-  const imageUrl = `${baseUrl}${article.image}`;
+  const imagePath = imageMap[article.imageKey as keyof typeof imageMap] ?? imageMap.illusEducation;
+  const imageUrl = `${baseUrl}${imagePath}`;
   const articleStructuredData = {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -60,10 +70,10 @@ const BlogArticle = () => {
     },
     publisher: {
       "@type": "Organization",
-      name: "AKC Gestion Conseils",
+      name: content.site.companyName,
       logo: {
         "@type": "ImageObject",
-        url: `${baseUrl}/logo-akc.svg`,
+        url: `${baseUrl}${content.site.logoPath}`,
       },
     },
     mainEntityOfPage: `${baseUrl}${canonicalPath}`,
@@ -76,7 +86,7 @@ const BlogArticle = () => {
         title={article.metaTitle}
         description={article.metaDescription}
         canonicalPath={canonicalPath}
-        image={article.image}
+        image={imagePath}
         type="article"
         keywords={article.keywords}
         publishedTime={article.publishedAt}
@@ -91,7 +101,7 @@ const BlogArticle = () => {
             className="inline-flex items-center text-sm font-semibold mb-8 hover:text-navy-light transition-colors"
           >
             <ArrowLeft size={16} className="mr-2" />
-            Retour aux articles
+              {blog.backToBlogLabel}
           </Link>
 
           <div className="mb-8">
@@ -116,7 +126,7 @@ const BlogArticle = () => {
 
           <div className="rounded-2xl overflow-hidden shadow-lg mb-10">
             <img
-              src={article.image}
+              src={imagePath}
               alt={article.imageAlt}
               className="w-full h-[240px] md:h-[420px] object-cover"
               loading="eager"
@@ -148,17 +158,16 @@ const BlogArticle = () => {
 
           <div className="mt-14 p-8 rounded-2xl bg-accent/40">
             <h3 className="font-display text-2xl font-semibold mb-3">
-              Besoin d'un accompagnement personnalise ?
+              {blog.articleCtaTitle}
             </h3>
             <p className="text-muted-foreground mb-6">
-              AKC Gestion Conseils vous aide a transformer ces recommandations en plan
-              d'action adapte a votre situation.
+              {blog.articleCtaDescription}
             </p>
             <Link
               to="/rendez-vous"
               className="inline-flex items-center px-7 py-3 rounded-full bg-primary text-primary-foreground font-semibold hover:bg-navy-light transition-colors"
             >
-              Prendre rendez-vous
+              {blog.articleCtaLabel}
             </Link>
           </div>
         </div>

@@ -2,9 +2,20 @@ import Layout from "@/components/Layout";
 import { Link } from "react-router-dom";
 import { ArrowRight, Calendar, Clock } from "lucide-react";
 import Seo from "@/components/Seo";
-import { blogArticles, formatBlogDate } from "@/data/blogArticles";
+import { useCmsContent } from "@/context/CmsContentContext";
+import { imageMap } from "@/content/imageMap";
+
+const formatBlogDate = (date: string) =>
+  new Intl.DateTimeFormat("fr-FR", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  }).format(new Date(date));
 
 const Blog = () => {
+  const { content } = useCmsContent();
+  const blog = content.blog;
+  const posts = blog.posts;
   const baseUrl =
     typeof window !== "undefined" && window.location.origin
       ? window.location.origin
@@ -13,32 +24,35 @@ const Blog = () => {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Blog",
-    name: "Blog AKC Gestion Conseils",
-    description:
-      "Articles pratiques sur l'accompagnement educatif, l'insertion professionnelle et le coaching en entreprise.",
+    name: `Blog ${content.site.companyName}`,
+    description: blog.seoDescription,
     url: `${baseUrl}/blog`,
-    blogPost: blogArticles.map((article) => ({
-      "@type": "BlogPosting",
-      headline: article.title,
-      datePublished: article.publishedAt,
-      dateModified: article.updatedAt,
-      url: `${baseUrl}/blog/${article.slug}`,
-      image: `${baseUrl}${article.image}`,
-      keywords: article.keywords.join(", "),
-      author: {
-        "@type": "Organization",
-        name: article.author,
-      },
-    })),
+    blogPost: posts.map((article) => {
+      const articleImage =
+        imageMap[article.imageKey as keyof typeof imageMap] ?? imageMap.illusEducation;
+      return {
+        "@type": "BlogPosting",
+        headline: article.title,
+        datePublished: article.publishedAt,
+        dateModified: article.updatedAt,
+        url: `${baseUrl}/blog/${article.slug}`,
+        image: `${baseUrl}${articleImage}`,
+        keywords: article.keywords.join(", "),
+        author: {
+          "@type": "Organization",
+          name: article.author,
+        },
+      };
+    }),
   };
 
   return (
     <Layout>
       <Seo
-        title="Blog AKC Gestion Conseils | Conseils educatifs, insertion et coaching"
-        description="3 articles de fond pour avancer sur les enjeux educatifs, l'orientation professionnelle et la performance des equipes."
+        title={blog.seoTitle}
+        description={blog.seoDescription}
         canonicalPath="/blog"
-        image="/logo-akc.svg"
+        image={content.site.logoPath}
         type="website"
         keywords={[
           "blog accompagnement educatif",
@@ -53,19 +67,21 @@ const Blog = () => {
         <div className="container">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <span className="inline-flex items-center px-5 py-2 rounded-full bg-gold-light text-xs font-semibold tracking-wider uppercase mb-6">
-              Blog
+              {blog.badge}
             </span>
             <h1 className="font-display text-4xl md:text-5xl font-bold mb-6">
-              Nos 3 articles de reference
+              {blog.listingTitle}
             </h1>
             <p className="text-muted-foreground text-lg">
-              Des contenus utiles et actionnables pour progresser sur les sujets educatifs,
-              l'insertion professionnelle et l'accompagnement en entreprise.
+              {blog.listingDescription}
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {blogArticles.map((article) => (
+            {posts.map((article) => {
+              const articleImage =
+                imageMap[article.imageKey as keyof typeof imageMap] ?? imageMap.illusEducation;
+              return (
               <article
                 key={article.slug}
                 className="group bg-card rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow"
@@ -73,7 +89,7 @@ const Blog = () => {
                 <Link to={`/blog/${article.slug}`} aria-label={`Lire l'article ${article.title}`}>
                   <div className="overflow-hidden h-52">
                     <img
-                      src={article.image}
+                      src={articleImage}
                       alt={article.imageAlt}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       loading="lazy"
@@ -111,7 +127,8 @@ const Blog = () => {
                   </Link>
                 </div>
               </article>
-            ))}
+            );
+            })}
           </div>
         </div>
       </section>
