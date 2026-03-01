@@ -4,6 +4,12 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useCmsContent } from "@/context/CmsContentContext";
 
+type FallbackState = {
+  mailto: string;
+  gmail: string;
+  plainText: string;
+};
+
 const Contact = () => {
   const { toast } = useToast();
   const { content } = useCmsContent();
@@ -11,25 +17,57 @@ const Contact = () => {
   const calendlyUrl = content.site.calendlyUrl;
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [fallbackMailto, setFallbackMailto] = useState<string | null>(null);
+  const [fallbackState, setFallbackState] = useState<FallbackState | null>(null);
 
-  const buildMailtoFallback = () => {
-    const fallbackSubject = encodeURIComponent(`[Contact site] ${form.subject || "Nouveau message"}`);
-    const fallbackBody = encodeURIComponent(
-      [
-        `Nom: ${form.name}`,
-        `Email: ${form.email}`,
-        "",
-        "Message:",
-        form.message,
-      ].join("\n"),
-    );
-    return `mailto:${content.site.contactEmail}?subject=${fallbackSubject}&body=${fallbackBody}`;
+  const buildFallbackState = () => {
+    const subjectText = `[Contact site] ${form.subject || "Nouveau message"}`;
+    const plainText = [
+      `Nom: ${form.name}`,
+      `Email: ${form.email}`,
+      "",
+      "Message:",
+      form.message,
+    ].join("\n");
+    const subject = encodeURIComponent(subjectText);
+    const body = encodeURIComponent(plainText);
+    const to = encodeURIComponent(content.site.contactEmail);
+    return {
+      mailto: `mailto:${content.site.contactEmail}?subject=${subject}&body=${body}`,
+      gmail: `https://mail.google.com/mail/?view=cm&fs=1&to=${to}&su=${subject}&body=${body}`,
+      plainText,
+    };
+  };
+
+  const activateFallback = (description: string) => {
+    const nextFallbackState = buildFallbackState();
+    setFallbackState(nextFallbackState);
+    toast({
+      title: "Envoi alternatif active",
+      description,
+    });
+  };
+
+  const onCopyFallback = async () => {
+    if (!fallbackState) {
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(fallbackState.plainText);
+      toast({
+        title: "Message copie",
+        description: "Le contenu a ete copie dans le presse-papiers.",
+      });
+    } catch {
+      toast({
+        title: "Copie impossible",
+        description: "Copiez le texte manuellement depuis le formulaire.",
+      });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setFallbackMailto(null);
+    setFallbackState(null);
     try {
       setIsSubmitting(true);
       const response = await fetch("/api/contact", {
@@ -50,14 +88,9 @@ const Contact = () => {
             ? errorPayload.error
             : page.form.errorDescription;
         if (errorPayload.fallback) {
-          const mailtoLink = buildMailtoFallback();
-          setFallbackMailto(mailtoLink);
-          window.location.href = mailtoLink;
-          toast({
-            title: page.form.errorTitle,
-            description:
-              "La configuration email serveur est incomplete. Un email pre-rempli va s'ouvrir dans votre messagerie.",
-          });
+          activateFallback(
+            "Le service email serveur n'est pas configure. Utilisez les boutons d'envoi juste en dessous.",
+          );
           return;
         }
         throw new Error(message);
@@ -67,14 +100,9 @@ const Contact = () => {
         fallback?: boolean;
       };
       if (payload.fallback) {
-        const mailtoLink = buildMailtoFallback();
-        setFallbackMailto(mailtoLink);
-        window.location.href = mailtoLink;
-        toast({
-          title: page.form.errorTitle,
-          description:
-            "Le service email est indisponible temporairement. Un email pre-rempli va s'ouvrir dans votre messagerie.",
-        });
+        activateFallback(
+          "Le service email est indisponible temporairement. Utilisez les boutons d'envoi juste en dessous.",
+        );
         return;
       }
 
@@ -84,16 +112,11 @@ const Contact = () => {
       });
       setForm({ name: "", email: "", subject: "", message: "" });
     } catch (error) {
-      const mailtoLink = buildMailtoFallback();
-      setFallbackMailto(mailtoLink);
-      window.location.href = mailtoLink;
-      toast({
-        title: page.form.errorTitle,
-        description:
-          error instanceof Error
-            ? `${error.message} Un email pre-rempli va s'ouvrir dans votre messagerie.`
-            : "Une erreur est survenue. Un email pre-rempli va s'ouvrir dans votre messagerie.",
-      });
+      activateFallback(
+        error instanceof Error
+          ? `${error.message} Utilisez les boutons d'envoi juste en dessous.`
+          : "Une erreur est survenue. Utilisez les boutons d'envoi juste en dessous.",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -168,17 +191,34 @@ const Contact = () => {
                 {isSubmitting ? "Envoi..." : page.form.submitLabel} <Send size={16} className="ml-2" />
               </button>
 
-              {fallbackMailto && (
+              {fallbackState && (
                 <div className="rounded-xl border border-border bg-accent/40 px-4 py-3 text-sm text-muted-foreground">
-                  <p className="mb-2">
-                    Si votre messagerie ne s'ouvre pas automatiquement, cliquez ici :
+                  <p className="mb-3">
+                    Envoi direct indisponible pour le moment. Choisissez une option :
                   </p>
-                  <a
-                    href={fallbackMailto}
-                    className="underline text-foreground hover:text-navy-light break-all"
-                  >
-                    Ouvrir l'email pre-rempli
-                  </a>
+                  <div className="flex flex-wrap gap-2">
+                    <a
+                      href={fallbackState.mailto}
+                      className="inline-flex items-center px-3 py-2 rounded-full bg-primary text-primary-foreground text-xs font-semibold hover:bg-navy-light transition-colors"
+                    >
+                      Ouvrir ma messagerie
+                    </a>
+                    <a
+                      href={fallbackState.gmail}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center px-3 py-2 rounded-full bg-secondary text-secondary-foreground text-xs font-semibold hover:bg-secondary/90 transition-colors"
+                    >
+                      Ouvrir Gmail Web
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => void onCopyFallback()}
+                      className="inline-flex items-center px-3 py-2 rounded-full bg-secondary text-secondary-foreground text-xs font-semibold hover:bg-secondary/90 transition-colors"
+                    >
+                      Copier le message
+                    </button>
+                  </div>
                 </div>
               )}
             </form>

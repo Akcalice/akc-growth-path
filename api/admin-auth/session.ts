@@ -9,6 +9,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     res.setHeader("Allow", "GET");
     return res.status(405).json({ error: "Methode non autorisee." });
   }
+  res.setHeader("Cache-Control", "no-store");
 
   const session = getSessionFromRequest(req);
   if (!session) {

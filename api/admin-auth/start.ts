@@ -15,7 +15,19 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     return res.status(405).json({ error: "Methode non autorisee." });
   }
 
-  const { resendApiKey, resendFromEmail } = getAdminAuthConfig();
+  const {
+    resendApiKey,
+    resendFromEmail,
+    adminEmail,
+    adminPassword,
+    secret,
+  } = getAdminAuthConfig();
+  if (!adminEmail || !adminPassword || !secret) {
+    return res.status(500).json({
+      error:
+        "Configuration admin incomplete. Definir ADMIN_LOGIN_EMAIL, ADMIN_LOGIN_PASSWORD et ADMIN_AUTH_SECRET.",
+    });
+  }
   if (!resendApiKey || !resendFromEmail) {
     return res.status(500).json({
       error:
