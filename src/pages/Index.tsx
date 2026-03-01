@@ -105,10 +105,10 @@ const Index = () => (
           </Link>
         </div>
       </div>
-      {/* Book images strip */}
+      {/* Book images - side aligned */}
       <div className="container relative pb-10 md:pb-16">
-        <div className="rounded-2xl overflow-hidden shadow-lg max-w-4xl mx-auto">
-          <img src={booksHero} alt="Livres ouverts symbolisant le savoir et l'accompagnement" className="w-full h-48 md:h-72 object-cover" loading="lazy" />
+        <div className="rounded-2xl overflow-hidden shadow-lg max-w-md ml-0">
+          <img src={booksHero} alt="Livres ouverts symbolisant le savoir et l'accompagnement" className="w-full h-40 md:h-56 object-cover" loading="lazy" />
         </div>
       </div>
     </section>

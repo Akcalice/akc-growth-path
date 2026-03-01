@@ -1,5 +1,5 @@
 import Layout from "@/components/Layout";
-import { Mail, Phone, MapPin, Send } from "lucide-react";
+import { Mail, MapPin, Send } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -93,12 +93,6 @@ const Contact = () => {
                     </div>
                     contact@akconseil.fr
                   </a>
-                  <div className="flex items-center gap-3 text-sm">
-                    <div className="w-10 h-10 rounded-full bg-gold-light flex items-center justify-center">
-                      <Phone size={18} className="text-foreground" />
-                    </div>
-                    +33 6 00 00 00 00
-                  </div>
                   <div className="flex items-center gap-3 text-sm">
                     <div className="w-10 h-10 rounded-full bg-gold-light flex items-center justify-center">
                       <MapPin size={18} className="text-foreground" />

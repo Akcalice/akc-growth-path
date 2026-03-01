@@ -1,8 +1,8 @@
 import Layout from "@/components/Layout";
 import { Link } from "react-router-dom";
-import booksHero from "@/assets/books-hero.jpg";
-import coachingSession from "@/assets/coaching-session.jpg";
-import familySupport from "@/assets/family-support.jpg";
+import illusEducation from "@/assets/illus-education.jpg";
+import illusInsertion from "@/assets/illus-insertion.jpg";
+import illusCoaching from "@/assets/illus-coaching.jpg";
 import { GraduationCap, Users, Briefcase, Building2, User, ArrowRight } from "lucide-react";
 
 const servicesData = [
@@ -11,21 +11,21 @@ const servicesData = [
     title: "Accompagnement éducatif",
     description: "Orientation, écoute attentive et soutien dans la gestion de situations complexes : éducation, développement personnel et équilibre familial.",
     forWho: "Parents, familles, jeunes",
-    image: familySupport,
+    image: illusEducation,
   },
   {
     icon: Users,
     title: "Insertion & orientation professionnelle",
     description: "Ateliers ciblés, bilans de compétences et temps d'échange pour définir un projet clair, valoriser vos compétences et reprendre confiance.",
     forWho: "Personnes en reconversion, demandeurs d'emploi",
-    image: coachingSession,
+    image: illusInsertion,
   },
   {
     icon: Briefcase,
     title: "Coaching professionnel",
     description: "Formations et ateliers pratiques pour booster la confiance, atteindre ses objectifs, renforcer la cohésion et encourager l'autonomie.",
     forWho: "Entreprises, structures, professionnels",
-    image: booksHero,
+    image: illusCoaching,
   },
 ];
 
@@ -50,9 +50,9 @@ const Services = () => (
 
         <div className="space-y-16">
           {servicesData.map((s, i) => (
-            <div key={i} className={`grid md:grid-cols-2 gap-10 items-center ${i % 2 === 1 ? "md:direction-rtl" : ""}`}>
+            <div key={i} className={`grid md:grid-cols-2 gap-10 items-center`}>
               <div className={i % 2 === 1 ? "md:order-2" : ""}>
-                <div className="rounded-2xl overflow-hidden shadow-lg">
+                <div className="rounded-2xl overflow-hidden shadow-lg bg-accent/30">
                   <img src={s.image} alt={s.title} className="w-full h-72 object-cover" loading="lazy" />
                 </div>
               </div>

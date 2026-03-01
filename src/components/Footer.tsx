@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Mail, Phone, MapPin } from "lucide-react";
+import { Mail, MapPin } from "lucide-react";
 
 const Footer = () => (
   <footer className="bg-primary text-primary-foreground">
@@ -35,9 +35,6 @@ const Footer = () => (
             <a href="mailto:contact@akconseil.fr" className="flex items-center gap-2 hover:text-primary-foreground transition-colors">
               <Mail size={16} /> contact@akconseil.fr
             </a>
-            <span className="flex items-center gap-2">
-              <Phone size={16} /> +33 6 00 00 00 00
-            </span>
             <span className="flex items-center gap-2">
               <MapPin size={16} /> France
             </span>

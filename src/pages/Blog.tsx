@@ -1,8 +1,11 @@
 import Layout from "@/components/Layout";
 import { Link } from "react-router-dom";
 import booksStudy from "@/assets/books-study.jpg";
-import coachingSession from "@/assets/coaching-session.jpg";
-import familySupport from "@/assets/family-support.jpg";
+import illusEducation from "@/assets/illus-education.jpg";
+import illusInsertion from "@/assets/illus-insertion.jpg";
+import illusCoaching from "@/assets/illus-coaching.jpg";
+import illusGrowth from "@/assets/illus-growth.jpg";
+import illusWellbeing from "@/assets/illus-wellbeing.jpg";
 import { Calendar, ArrowRight } from "lucide-react";
 
 const articles = [
@@ -11,42 +14,42 @@ const articles = [
     excerpt: "Découvrez les clés pour soutenir un jeune en perte de motivation et l'aider à retrouver confiance en ses capacités.",
     date: "15 Fév 2026",
     category: "Éducatif",
-    image: familySupport,
+    image: illusEducation,
   },
   {
     title: "Réussir sa reconversion professionnelle en 5 étapes",
     excerpt: "De l'idée au projet concret : les étapes essentielles pour changer de voie avec sérénité et méthode.",
     date: "8 Fév 2026",
     category: "Insertion",
-    image: coachingSession,
+    image: illusInsertion,
   },
   {
     title: "L'importance du coaching en entreprise",
     excerpt: "Pourquoi de plus en plus de structures font appel au coaching pour renforcer la cohésion et la performance de leurs équipes.",
     date: "1 Fév 2026",
     category: "Professionnel",
-    image: booksStudy,
+    image: illusCoaching,
   },
   {
     title: "Parentalité positive : mythes et réalités",
     excerpt: "Comprendre les fondements de la parentalité bienveillante et comment l'appliquer au quotidien.",
     date: "25 Jan 2026",
     category: "Éducatif",
-    image: familySupport,
+    image: booksStudy,
   },
   {
     title: "Valoriser ses compétences lors d'un entretien d'embauche",
     excerpt: "Techniques concrètes pour mettre en avant votre parcours et convaincre votre futur employeur.",
     date: "18 Jan 2026",
     category: "Insertion",
-    image: coachingSession,
+    image: illusGrowth,
   },
   {
     title: "Gérer le stress au travail : outils et méthodes",
     excerpt: "Des stratégies pratiques pour retrouver un équilibre professionnel et préserver son bien-être.",
     date: "10 Jan 2026",
     category: "Professionnel",
-    image: booksStudy,
+    image: illusWellbeing,
   },
 ];
 
