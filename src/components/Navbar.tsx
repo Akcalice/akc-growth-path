@@ -2,6 +2,8 @@ import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { useCmsContent } from "@/context/CmsContentContext";
+import EditableImage from "@/components/visual-editor/EditableImage";
+import EditableText from "@/components/visual-editor/EditableText";
 
 const Navbar = () => {
   const location = useLocation();
@@ -9,24 +11,26 @@ const Navbar = () => {
   const { content } = useCmsContent();
   const navLinks = content.navbar.links;
   const logoPath = content.site.logoPath || "/logo-akc.svg";
-  const logoSrc = `${logoPath}${logoPath.includes("?") ? "&" : "?"}v=9`;
+  const logoSrc = `${logoPath}${logoPath.includes("?") ? "&" : "?"}v=10`;
   const calendlyUrl = content.site.calendlyUrl;
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-md border-b border-border">
       <nav className="container flex items-center justify-between h-16 md:h-20">
         <Link to="/" className="flex items-center gap-2" aria-label="Retour à l'accueil AKC">
-          <img
+          <EditableImage
+            path="site.logoPath"
             src={logoSrc}
             alt={`Logo ${content.site.companyName}`}
             className="h-9 md:h-11 w-auto"
+            imgClassName="h-9 md:h-11 w-auto"
             loading="eager"
           />
         </Link>
 
         {/* Desktop */}
         <div className="hidden md:flex items-center gap-1">
-          {navLinks.map((link) => (
+          {navLinks.map((link, index) => (
             <Link
               key={link.to}
               to={link.to}
@@ -36,7 +40,10 @@ const Navbar = () => {
                   : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
               }`}
             >
-              {link.label}
+              <EditableText
+                path={`navbar.links[${index}].label`}
+                value={link.label}
+              />
             </Link>
           ))}
         </div>
@@ -47,7 +54,7 @@ const Navbar = () => {
           rel="noreferrer"
           className="hidden md:inline-flex items-center px-6 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-semibold hover:bg-navy-light transition-colors"
         >
-          {content.navbar.ctaLabel}
+          <EditableText path="navbar.ctaLabel" value={content.navbar.ctaLabel} />
         </a>
 
         {/* Mobile toggle */}
@@ -63,7 +70,7 @@ const Navbar = () => {
       {mobileOpen && (
         <div className="md:hidden bg-background border-b border-border animate-fade-in">
           <div className="container py-4 flex flex-col gap-2">
-            {navLinks.map((link) => (
+            {navLinks.map((link, index) => (
               <Link
                 key={link.to}
                 to={link.to}
@@ -74,7 +81,10 @@ const Navbar = () => {
                     : "text-muted-foreground hover:bg-accent/50"
                 }`}
               >
-                {link.label}
+                <EditableText
+                  path={`navbar.links[${index}].label`}
+                  value={link.label}
+                />
               </Link>
             ))}
             <a
@@ -84,7 +94,7 @@ const Navbar = () => {
               onClick={() => setMobileOpen(false)}
               className="mt-2 px-6 py-3 rounded-full bg-primary text-primary-foreground text-sm font-semibold text-center"
             >
-              {content.navbar.ctaLabel}
+              <EditableText path="navbar.ctaLabel" value={content.navbar.ctaLabel} />
             </a>
           </div>
         </div>

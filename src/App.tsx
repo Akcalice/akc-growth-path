@@ -2,9 +2,11 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import ScrollToTop from "@/components/ScrollToTop";
+import VisualEditorToolbar from "@/components/visual-editor/VisualEditorToolbar";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { CmsContentProvider } from "./context/CmsContentContext";
+import { VisualEditorProvider } from "./context/VisualEditorContext";
 import Index from "./pages/Index";
 import APropos from "./pages/APropos";
 import Services from "./pages/Services";
@@ -27,21 +29,24 @@ const App = () => (
       <Sonner />
       <CmsContentProvider>
         <BrowserRouter>
-          <ScrollToTop />
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/a-propos" element={<APropos />} />
-            <Route path="/services" element={<Services />} />
-            <Route path="/accompagnement" element={<Accompagnement />} />
-            <Route path="/blog" element={<Blog />} />
-            <Route path="/blog/:slug" element={<BlogArticle />} />
-            <Route path="/prix" element={<Prix />} />
-            <Route path="/rendez-vous" element={<RendezVous />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/admin-cms" element={<AdminCms />} />
-            <Route path="/admin-dashboard" element={<AdminDashboard />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <VisualEditorProvider>
+            <ScrollToTop />
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/a-propos" element={<APropos />} />
+              <Route path="/services" element={<Services />} />
+              <Route path="/accompagnement" element={<Accompagnement />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/blog/:slug" element={<BlogArticle />} />
+              <Route path="/prix" element={<Prix />} />
+              <Route path="/rendez-vous" element={<RendezVous />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/admin-cms" element={<AdminCms />} />
+              <Route path="/admin-dashboard" element={<AdminDashboard />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+            <VisualEditorToolbar />
+          </VisualEditorProvider>
         </BrowserRouter>
       </CmsContentProvider>
     </TooltipProvider>

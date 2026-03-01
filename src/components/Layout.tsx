@@ -38,7 +38,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
       document.head.appendChild(icon);
     }
     icon.setAttribute("type", "image/svg+xml");
-    icon.href = `${faviconPath}${faviconPath.includes("?") ? "&" : "?"}v=9`;
+    icon.href = `${faviconPath}${faviconPath.includes("?") ? "&" : "?"}v=10`;
   }, [
     location.pathname,
     content.site.tabTitle,

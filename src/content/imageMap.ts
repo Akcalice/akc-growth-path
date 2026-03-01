@@ -25,3 +25,13 @@ export const imageMap = {
 } as const;
 
 export type ImageKey = keyof typeof imageMap;
+
+export const resolveImageSrc = (keyOrPath: string | undefined, fallback: string) => {
+  if (!keyOrPath) {
+    return fallback;
+  }
+  if (keyOrPath in imageMap) {
+    return imageMap[keyOrPath as ImageKey];
+  }
+  return keyOrPath;
+};

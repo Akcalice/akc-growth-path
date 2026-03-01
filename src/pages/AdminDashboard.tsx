@@ -32,12 +32,20 @@ const AdminDashboard = () => (
             <p className="text-sm text-muted-foreground mb-4">
               Modifier les textes, sections, blog et metadata du site.
             </p>
-            <Link
-              to="/admin-cms"
-              className="inline-flex items-center px-5 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-semibold hover:bg-navy-light transition-colors"
-            >
-              Ouvrir le CMS
-            </Link>
+            <div className="flex flex-wrap gap-2">
+              <Link
+                to="/admin-cms"
+                className="inline-flex items-center px-5 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-semibold hover:bg-navy-light transition-colors"
+              >
+                Ouvrir le CMS JSON
+              </Link>
+              <a
+                href="/?edit=1"
+                className="inline-flex items-center px-5 py-2.5 rounded-full bg-secondary text-secondary-foreground text-sm font-semibold hover:bg-secondary/90 transition-colors"
+              >
+                Ouvrir l'editeur visuel
+              </a>
+            </div>
           </div>
 
           <div className="bg-card rounded-2xl border border-border p-6">
@@ -61,7 +69,7 @@ const AdminDashboard = () => (
               Repository principal, historique des versions et collaboration.
             </p>
             <a
-              href="https://github.com/Akcalice/akc-growth-path"
+              href="https://github.com/Akcalice/akcsite"
               target="_blank"
               rel="noreferrer"
               className="inline-flex items-center px-5 py-2.5 rounded-full bg-secondary text-secondary-foreground text-sm font-semibold hover:bg-secondary/90 transition-colors"

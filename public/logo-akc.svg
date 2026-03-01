@@ -1,26 +1,33 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 140" role="img" aria-labelledby="logoTitle logoDesc">
-  <title id="logoTitle">Logo AKC</title>
-  <desc id="logoDesc">Monogramme AKC en doré</desc>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 280" role="img" aria-labelledby="logoTitle logoDesc">
+  <title id="logoTitle">Logo AKConseil</title>
+  <desc id="logoDesc">Motif AKC dore sur fond bleu nuit</desc>
   <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1F2A44" />
+      <stop offset="100%" stop-color="#0B1635" />
+    </linearGradient>
     <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#F2E1B5" />
       <stop offset="45%" stop-color="#DEC78F" />
       <stop offset="100%" stop-color="#B99756" />
     </linearGradient>
   </defs>
+
+  <rect x="0" y="0" width="840" height="280" rx="34" fill="url(#bgGradient)" />
+
   <g fill="url(#goldGradient)">
     <text
-      x="20"
-      y="104"
-      font-size="102"
+      x="120"
+      y="188"
+      font-size="180"
       font-weight="500"
-      letter-spacing="7"
+      letter-spacing="12"
       font-family="'Playfair Display', Georgia, serif"
     >
       AKC
     </text>
-    <polygon points="67,79 73,67 79,79" />
-    <polygon points="75,79 81,67 87,79" />
-    <polygon points="59,79 65,67 71,79" />
+    <polygon points="255,132 269,106 283,132" />
+    <polygon points="273,132 287,106 301,132" />
+    <polygon points="237,132 251,106 265,132" />
   </g>
 </svg>
