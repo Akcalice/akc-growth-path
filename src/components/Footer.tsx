@@ -6,8 +6,8 @@ import EditableText from "@/components/visual-editor/EditableText";
 
 const Footer = () => {
   const { content } = useCmsContent();
-  const logoPath = content.site.logoPath || "/logo-akc.svg";
-  const logoSrc = `${logoPath}${logoPath.includes("?") ? "&" : "?"}v=10`;
+  const logoPath = "/logo-akc.svg";
+  const logoSrc = `${logoPath}${logoPath.includes("?") ? "&" : "?"}v=11`;
   const calendlyUrl = content.site.calendlyUrl;
 
   return (

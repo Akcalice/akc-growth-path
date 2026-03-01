@@ -10,8 +10,8 @@ const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { content } = useCmsContent();
   const navLinks = content.navbar.links;
-  const logoPath = content.site.logoPath || "/logo-akc.svg";
-  const logoSrc = `${logoPath}${logoPath.includes("?") ? "&" : "?"}v=10`;
+  const logoPath = "/logo-akc.svg";
+  const logoSrc = `${logoPath}${logoPath.includes("?") ? "&" : "?"}v=11`;
   const calendlyUrl = content.site.calendlyUrl;
 
   return (

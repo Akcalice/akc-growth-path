@@ -35,23 +35,26 @@ npm run build
 Le site est déployé sur Vercel depuis la branche `main`.
 Chaque push sur `main` déclenche un nouveau déploiement de production.
 
-## Backoffice CMS
+## Backoffice visuel securise
 
-Un backoffice JSON est disponible sur la route :
+Acces admin :
 
-- `/admin-dashboard`
-- `/admin-cms`
+- `/admin-login` : portail de connexion (email + mot de passe)
+- `/admin-dashboard` : dashboard backoffice
+- `/?edit=1` : editeur visuel au survol (apres connexion)
 
-Le contenu est chargé via `/api/cms-content` puis peut être publié vers GitHub.
+Le contenu edite est sauvegarde via `/api/cms-content` puis publie vers GitHub.
 
-### Variables d'environnement Vercel pour le CMS
+### Variables d'environnement Vercel pour le backoffice
 
-- `CMS_ADMIN_TOKEN` : token secret pour autoriser la publication depuis le backoffice.
-- `CMS_GITHUB_TOKEN` : token GitHub avec permission d'écriture sur le repository.
-- `CMS_GITHUB_OWNER` : propriétaire GitHub du repository (ex: `Akcalice`).
-- `CMS_GITHUB_REPO` : nom du repository (ex: `akc-growth-path`).
+- `ADMIN_LOGIN_EMAIL` : email autorise pour la connexion admin.
+- `ADMIN_LOGIN_PASSWORD` : mot de passe admin.
+- `ADMIN_AUTH_SECRET` : secret de signature des sessions admin.
+- `CMS_GITHUB_TOKEN` : token GitHub avec permission d'ecriture sur le repository.
+- `CMS_GITHUB_OWNER` : proprietaire GitHub du repository (ex: `Akcalice`).
+- `CMS_GITHUB_REPO` : nom du repository (ex: `akcsite`).
 - `CMS_GITHUB_BRANCH` : branche cible pour publier le contenu (ex: `main`).
-- `CMS_CONTENT_FILE_PATH` : chemin du fichier CMS dans le repo (par défaut `cms-content.json`).
+- `CMS_CONTENT_FILE_PATH` : chemin du fichier de contenu (par defaut `cms-content.json`).
 
 ## Envoi des messages du formulaire de contact
 

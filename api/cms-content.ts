@@ -1,5 +1,7 @@
+import { getSessionFromRequest } from "./_adminAuth";
+
 const DEFAULT_OWNER = "Akcalice";
-const DEFAULT_REPO = "akc-growth-path";
+const DEFAULT_REPO = "akcsite";
 const DEFAULT_BRANCH = "main";
 const DEFAULT_FILE_PATH = "cms-content.json";
 
@@ -63,12 +65,11 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
   }
 
   if (req.method === "PUT") {
-    const rawToken = req.headers["x-cms-token"];
-    const providedToken = Array.isArray(rawToken) ? rawToken[0] : rawToken;
-    const expectedToken = process.env.CMS_ADMIN_TOKEN;
-
-    if (!expectedToken || providedToken !== expectedToken) {
-      return res.status(401).json({ error: "Token backoffice invalide." });
+    const session = getSessionFromRequest(req);
+    if (!session) {
+      return res.status(401).json({
+        error: "Acces refuse. Connectez-vous au backoffice.",
+      });
     }
 
     const githubToken = process.env.CMS_GITHUB_TOKEN;

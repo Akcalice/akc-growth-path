@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 280" role="img" aria-labelledby="logoTitle logoDesc">
   <title id="logoTitle">Logo AKConseil</title>
-  <desc id="logoDesc">Motif AKC dore sur fond bleu nuit</desc>
+  <desc id="logoDesc">Motif AKC dore centre sur fond bleu nuit</desc>
   <defs>
     <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#1F2A44" />
@@ -17,8 +17,9 @@
 
   <g fill="url(#goldGradient)">
     <text
-      x="120"
+      x="420"
       y="188"
+      text-anchor="middle"
       font-size="180"
       font-weight="500"
       letter-spacing="12"
@@ -26,8 +27,8 @@
     >
       AKC
     </text>
-    <polygon points="255,132 269,106 283,132" />
-    <polygon points="273,132 287,106 301,132" />
-    <polygon points="237,132 251,106 265,132" />
+    <polygon points="342,132 356,106 370,132" />
+    <polygon points="360,132 374,106 388,132" />
+    <polygon points="324,132 338,106 352,132" />
   </g>
 </svg>

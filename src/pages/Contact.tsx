@@ -11,6 +11,7 @@ const Contact = () => {
   const calendlyUrl = content.site.calendlyUrl;
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [fallbackMailto, setFallbackMailto] = useState<string | null>(null);
 
   const buildMailtoFallback = () => {
     const fallbackSubject = encodeURIComponent(`[Contact site] ${form.subject || "Nouveau message"}`);
@@ -28,6 +29,7 @@ const Contact = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFallbackMailto(null);
     try {
       setIsSubmitting(true);
       const response = await fetch("/api/contact", {
@@ -48,7 +50,9 @@ const Contact = () => {
             ? errorPayload.error
             : page.form.errorDescription;
         if (errorPayload.fallback) {
-          window.location.href = buildMailtoFallback();
+          const mailtoLink = buildMailtoFallback();
+          setFallbackMailto(mailtoLink);
+          window.location.href = mailtoLink;
           toast({
             title: page.form.errorTitle,
             description:
@@ -63,7 +67,9 @@ const Contact = () => {
         fallback?: boolean;
       };
       if (payload.fallback) {
-        window.location.href = buildMailtoFallback();
+        const mailtoLink = buildMailtoFallback();
+        setFallbackMailto(mailtoLink);
+        window.location.href = mailtoLink;
         toast({
           title: page.form.errorTitle,
           description:
@@ -78,7 +84,9 @@ const Contact = () => {
       });
       setForm({ name: "", email: "", subject: "", message: "" });
     } catch (error) {
-      window.location.href = buildMailtoFallback();
+      const mailtoLink = buildMailtoFallback();
+      setFallbackMailto(mailtoLink);
+      window.location.href = mailtoLink;
       toast({
         title: page.form.errorTitle,
         description:
@@ -159,6 +167,20 @@ const Contact = () => {
               >
                 {isSubmitting ? "Envoi..." : page.form.submitLabel} <Send size={16} className="ml-2" />
               </button>
+
+              {fallbackMailto && (
+                <div className="rounded-xl border border-border bg-accent/40 px-4 py-3 text-sm text-muted-foreground">
+                  <p className="mb-2">
+                    Si votre messagerie ne s'ouvre pas automatiquement, cliquez ici :
+                  </p>
+                  <a
+                    href={fallbackMailto}
+                    className="underline text-foreground hover:text-navy-light break-all"
+                  >
+                    Ouvrir l'email pre-rempli
+                  </a>
+                </div>
+              )}
             </form>
 
             {/* Info */}

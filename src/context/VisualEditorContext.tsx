@@ -3,10 +3,10 @@ import {
   ReactNode,
   useContext,
   useState,
-  useEffect,
 } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useCmsContent } from "@/context/CmsContentContext";
+import { useAdminAuth } from "@/context/AdminAuthContext";
 import {
   appendToArrayByPath,
   removeArrayItemByPath,
@@ -14,10 +14,10 @@ import {
 } from "@/lib/objectPath";
 
 type VisualEditorContextValue = {
+  isRequested: boolean;
   isEnabled: boolean;
-  adminToken: string;
+  isAuthenticated: boolean;
   isSaving: boolean;
-  setAdminToken: (token: string) => void;
   updateField: (path: string, value: unknown) => void;
   clearField: (path: string) => void;
   appendArrayItem: (path: string, value: unknown) => void;
@@ -26,7 +26,6 @@ type VisualEditorContextValue = {
   exitEditMode: () => void;
 };
 
-const VISUAL_EDITOR_TOKEN_KEY = "akconseil_visual_editor_token";
 const VISUAL_EDITOR_QUERY_KEY = "edit";
 
 const cloneContent = <T,>(value: T): T => {
@@ -42,24 +41,13 @@ export const VisualEditorProvider = ({ children }: { children: ReactNode }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { content, setContentLocally, refresh } = useCmsContent();
+  const { isAuthenticated } = useAdminAuth();
 
-  const [adminToken, setAdminTokenState] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
-  useEffect(() => {
-    const savedToken = localStorage.getItem(VISUAL_EDITOR_TOKEN_KEY);
-    if (savedToken) {
-      setAdminTokenState(savedToken);
-    }
-  }, []);
-
-  const setAdminToken = (token: string) => {
-    setAdminTokenState(token);
-    localStorage.setItem(VISUAL_EDITOR_TOKEN_KEY, token);
-  };
-
   const searchParams = new URLSearchParams(location.search);
-  const isEnabled = searchParams.get(VISUAL_EDITOR_QUERY_KEY) === "1";
+  const isRequested = searchParams.get(VISUAL_EDITOR_QUERY_KEY) === "1";
+  const isEnabled = isRequested && isAuthenticated;
 
   const updateField = (path: string, value: unknown) => {
     const draft = cloneContent(content);
@@ -84,8 +72,8 @@ export const VisualEditorProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const saveContent = async () => {
-    if (!adminToken.trim()) {
-      throw new Error("Token backoffice requis pour publier les changements.");
+    if (!isAuthenticated) {
+      throw new Error("Connexion admin requise pour publier les changements.");
     }
 
     setIsSaving(true);
@@ -94,7 +82,6 @@ export const VisualEditorProvider = ({ children }: { children: ReactNode }) => {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          "x-cms-token": adminToken.trim(),
         },
         body: JSON.stringify({ content }),
       });
@@ -126,10 +113,10 @@ export const VisualEditorProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const value = {
+    isRequested,
     isEnabled,
-    adminToken,
+    isAuthenticated,
     isSaving,
-    setAdminToken,
     updateField,
     clearField,
     appendArrayItem,

@@ -19,8 +19,8 @@ const Index = () => {
   const { content } = useCmsContent();
   const home = content.home;
   const calendlyUrl = content.site.calendlyUrl;
-  const logoPath = content.site.logoPath || "/logo-akc.svg";
-  const logoSrc = `${logoPath}${logoPath.includes("?") ? "&" : "?"}v=10`;
+  const logoPath = "/logo-akc.svg";
+  const logoSrc = `${logoPath}${logoPath.includes("?") ? "&" : "?"}v=11`;
 
   return (
     <Layout>
@@ -66,17 +66,6 @@ const Index = () => {
             <EditableText path="home.heroSecondaryCta" value={home.heroSecondaryCta} />{" "}
             <ChevronRight size={18} className="ml-1" />
           </Link>
-        </div>
-      </div>
-      {/* Book images - side aligned */}
-      <div className="container relative pb-10 md:pb-16">
-        <div className="rounded-2xl overflow-hidden shadow-lg max-w-md ml-0">
-          <img
-            src={imageMap.booksHero}
-            alt="Livres ouverts symbolisant le savoir et l'accompagnement"
-            className="w-full h-40 md:h-56 object-cover"
-            loading="lazy"
-          />
         </div>
       </div>
     </section>

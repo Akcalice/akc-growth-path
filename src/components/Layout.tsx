@@ -29,7 +29,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
       meta.setAttribute("content", content.site.defaultMetaDescription);
     }
 
-    const faviconPath = content.site.faviconPath || content.site.logoPath;
+    const faviconPath = "/favicon-akconseil.svg";
 
     let icon = document.querySelector('link[rel="icon"]') as HTMLLinkElement | null;
     if (!icon) {
@@ -38,13 +38,11 @@ const Layout = ({ children }: { children: ReactNode }) => {
       document.head.appendChild(icon);
     }
     icon.setAttribute("type", "image/svg+xml");
-    icon.href = `${faviconPath}${faviconPath.includes("?") ? "&" : "?"}v=10`;
+    icon.href = `${faviconPath}${faviconPath.includes("?") ? "&" : "?"}v=11`;
   }, [
     location.pathname,
     content.site.tabTitle,
     content.site.defaultMetaDescription,
-    content.site.logoPath,
-    content.site.faviconPath,
   ]);
 
   return (

@@ -31,15 +31,15 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
   }
 
   const resendApiKey = process.env.RESEND_API_KEY;
-  const fromEmail = process.env.RESEND_FROM_EMAIL;
-  const toEmail = process.env.CONTACT_TO_EMAIL;
+  const fromEmail = process.env.RESEND_FROM_EMAIL || "AKConseil <onboarding@resend.dev>";
+  const toEmail = process.env.CONTACT_TO_EMAIL || "contact@akconseil.fr";
 
-  if (!resendApiKey || !fromEmail || !toEmail) {
+  if (!resendApiKey) {
     return res.status(200).json({
       success: false,
       fallback: true,
       error:
-        "Configuration email incomplete. Definir RESEND_API_KEY, RESEND_FROM_EMAIL et CONTACT_TO_EMAIL dans Vercel.",
+        "Configuration email incomplete. Definir au minimum RESEND_API_KEY dans Vercel.",
     });
   }
 
