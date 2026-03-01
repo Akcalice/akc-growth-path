@@ -39,6 +39,7 @@ Chaque push sur `main` déclenche un nouveau déploiement de production.
 
 Un backoffice JSON est disponible sur la route :
 
+- `/admin-dashboard`
 - `/admin-cms`
 
 Le contenu est chargé via `/api/cms-content` puis peut être publié vers GitHub.

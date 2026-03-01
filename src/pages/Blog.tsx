@@ -82,11 +82,12 @@ const Blog = () => {
               const articleImage =
                 imageMap[article.imageKey as keyof typeof imageMap] ?? imageMap.illusEducation;
               return (
-              <article
-                key={article.slug}
-                className="group bg-card rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow"
-              >
-                <Link to={`/blog/${article.slug}`} aria-label={`Lire l'article ${article.title}`}>
+              <article key={article.slug}>
+                <Link
+                  to={`/blog/${article.slug}`}
+                  aria-label={`Lire l'article ${article.title}`}
+                  className="group block bg-card rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow h-full"
+                >
                   <div className="overflow-hidden h-52">
                     <img
                       src={articleImage}
@@ -95,37 +96,31 @@ const Blog = () => {
                       loading="lazy"
                     />
                   </div>
-                </Link>
+                  <div className="p-6">
+                    <div className="flex flex-wrap items-center gap-3 mb-4">
+                      <span className="text-xs font-semibold px-3 py-1 rounded-full bg-gold-light">
+                        {article.category}
+                      </span>
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Calendar size={12} /> {formatBlogDate(article.publishedAt)}
+                      </span>
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Clock size={12} /> {article.readingTime}
+                      </span>
+                    </div>
 
-                <div className="p-6">
-                  <div className="flex flex-wrap items-center gap-3 mb-4">
-                    <span className="text-xs font-semibold px-3 py-1 rounded-full bg-gold-light">
-                      {article.category}
-                    </span>
-                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Calendar size={12} /> {formatBlogDate(article.publishedAt)}
-                    </span>
-                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Clock size={12} /> {article.readingTime}
+                    <h2 className="font-display text-xl font-semibold mb-3 leading-snug group-hover:text-navy-light transition-colors">
+                      {article.title}
+                    </h2>
+                    <p className="text-muted-foreground text-sm leading-relaxed mb-5">
+                      {article.excerpt}
+                    </p>
+
+                    <span className="inline-flex items-center text-sm font-semibold text-foreground group-hover:text-navy-light transition-colors">
+                      Lire l'article <ArrowRight size={14} className="ml-1" />
                     </span>
                   </div>
-
-                  <h2 className="font-display text-xl font-semibold mb-3 leading-snug">
-                    <Link to={`/blog/${article.slug}`} className="hover:text-navy-light transition-colors">
-                      {article.title}
-                    </Link>
-                  </h2>
-                  <p className="text-muted-foreground text-sm leading-relaxed mb-5">
-                    {article.excerpt}
-                  </p>
-
-                  <Link
-                    to={`/blog/${article.slug}`}
-                    className="inline-flex items-center text-sm font-semibold text-foreground group-hover:text-navy-light transition-colors"
-                  >
-                    Lire l'article <ArrowRight size={14} className="ml-1" />
-                  </Link>
-                </div>
+                </Link>
               </article>
             );
             })}

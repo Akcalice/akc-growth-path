@@ -3,6 +3,7 @@ import Seo from "@/components/Seo";
 import { useCmsContent } from "@/context/CmsContentContext";
 import { useToast } from "@/hooks/use-toast";
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 
 const formatJson = (value: unknown) => JSON.stringify(value, null, 2);
 
@@ -117,6 +118,12 @@ const AdminCms = () => {
             <p className="text-muted-foreground">
               Modifiez le contenu du site dans le JSON puis cliquez sur Publier.
             </p>
+            <Link
+              to="/admin-dashboard"
+              className="inline-flex mt-4 text-sm font-semibold hover:text-navy-light transition-colors"
+            >
+              Voir le dashboard backoffice
+            </Link>
           </div>
 
           <div className="bg-accent/40 rounded-2xl p-6 md:p-8 mb-8">

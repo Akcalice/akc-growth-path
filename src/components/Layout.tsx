@@ -36,7 +36,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
       document.head.appendChild(icon);
     }
     icon.setAttribute("type", "image/svg+xml");
-    icon.href = `${content.site.logoPath}?v=3`;
+    icon.href = `${content.site.logoPath}?v=5`;
   }, [
     location.pathname,
     content.site.tabTitle,

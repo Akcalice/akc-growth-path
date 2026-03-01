@@ -64,8 +64,11 @@ const Footer = () => {
             </Link>
           </div>
         </div>
-        <div className="border-t border-primary-foreground/10 mt-12 pt-8 text-center text-sm text-primary-foreground/50">
-          © {new Date().getFullYear()} {content.site.companyName}. {content.footer.copyrightText}
+        <div className="border-t border-primary-foreground/10 mt-12 pt-8 text-center text-sm text-primary-foreground/50 space-y-1">
+          <p>
+            © {new Date().getFullYear()} {content.site.companyName}. {content.footer.copyrightText}
+          </p>
+          <p>Created by Becc's Studio</p>
         </div>
       </div>
     </footer>

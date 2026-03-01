@@ -1,6 +1,7 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import ScrollToTop from "@/components/ScrollToTop";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { CmsContentProvider } from "./context/CmsContentContext";
@@ -15,6 +16,7 @@ import RendezVous from "./pages/RendezVous";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 import AdminCms from "./pages/AdminCms";
+import AdminDashboard from "./pages/AdminDashboard";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +27,7 @@ const App = () => (
       <Sonner />
       <CmsContentProvider>
         <BrowserRouter>
+          <ScrollToTop />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/a-propos" element={<APropos />} />
@@ -36,6 +39,7 @@ const App = () => (
             <Route path="/rendez-vous" element={<RendezVous />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/admin-cms" element={<AdminCms />} />
+            <Route path="/admin-dashboard" element={<AdminDashboard />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

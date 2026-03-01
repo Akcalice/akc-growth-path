@@ -190,10 +190,10 @@ export type CmsContent = {
 
 export const defaultCmsContent: CmsContent = {
   site: {
-    companyName: "AKC Gestion Conseils",
-    tabTitle: "AKC Gestion Conseils",
+    companyName: "AKConseil",
+    tabTitle: "AKConseil",
     defaultMetaDescription:
-      "AKC Gestion Conseils : accompagnement educatif, social et professionnel sur-mesure.",
+      "AKConseil : accompagnement educatif, social et professionnel sur-mesure.",
     ogImage: "/logo-akc.svg",
     logoPath: "/logo-akc.svg",
     contactEmail: "contact@akconseil.fr",
@@ -616,7 +616,7 @@ export const defaultCmsContent: CmsContent = {
     listingTitle: "Nos 3 articles de reference",
     listingDescription:
       "Des contenus utiles et actionnables pour progresser sur les sujets educatifs, l'insertion professionnelle et l'accompagnement en entreprise.",
-    seoTitle: "Blog AKC Gestion Conseils | Conseils educatifs, insertion et coaching",
+    seoTitle: "Blog AKConseil | Conseils educatifs, insertion et coaching",
     seoDescription:
       "3 articles de fond pour avancer sur les enjeux educatifs, l'orientation professionnelle et la performance des equipes.",
     posts: [
