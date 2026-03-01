@@ -28,6 +28,7 @@ export type CmsContent = {
     defaultMetaDescription: string;
     ogImage: string;
     logoPath: string;
+    faviconPath: string;
     contactEmail: string;
     location: string;
   };
@@ -196,6 +197,7 @@ export const defaultCmsContent: CmsContent = {
       "AKConseil : accompagnement educatif, social et professionnel sur-mesure.",
     ogImage: "/logo-akc.svg",
     logoPath: "/logo-akc.svg",
+    faviconPath: "/favicon-akconseil.svg",
     contactEmail: "contact@akconseil.fr",
     location: "France",
   },

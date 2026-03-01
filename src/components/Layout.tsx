@@ -29,6 +29,8 @@ const Layout = ({ children }: { children: ReactNode }) => {
       meta.setAttribute("content", content.site.defaultMetaDescription);
     }
 
+    const faviconPath = content.site.faviconPath || content.site.logoPath;
+
     let icon = document.querySelector('link[rel="icon"]') as HTMLLinkElement | null;
     if (!icon) {
       icon = document.createElement("link");
@@ -36,12 +38,13 @@ const Layout = ({ children }: { children: ReactNode }) => {
       document.head.appendChild(icon);
     }
     icon.setAttribute("type", "image/svg+xml");
-    icon.href = `${content.site.logoPath}?v=5`;
+    icon.href = `${faviconPath}?v=7`;
   }, [
     location.pathname,
     content.site.tabTitle,
     content.site.defaultMetaDescription,
     content.site.logoPath,
+    content.site.faviconPath,
   ]);
 
   return (

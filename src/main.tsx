@@ -9,7 +9,7 @@ const mainFavicon =
   (document.createElement("link") as HTMLLinkElement);
 mainFavicon.setAttribute("rel", "icon");
 mainFavicon.setAttribute("type", "image/svg+xml");
-mainFavicon.href = "/logo-akc.svg?v=5";
+mainFavicon.href = "/favicon-akconseil.svg?v=7";
 if (!mainFavicon.parentElement) {
   document.head.appendChild(mainFavicon);
 }
