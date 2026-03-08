@@ -33,6 +33,9 @@ const parseJsonBody = (body: unknown) => {
   return {};
 };
 
+const normalizeHeaderValue = (value: string | string[] | undefined) =>
+  Array.isArray(value) ? value[0] : value;
+
 type ApiRequest = {
   method?: string;
   headers: Record<string, string | string[] | undefined>;
@@ -66,9 +69,15 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
 
   if (req.method === "PUT") {
     const session = getSessionFromRequest(req);
-    if (!session) {
+    const providedPassword = normalizeHeaderValue(req.headers["x-admin-password"])?.trim();
+    const expectedPassword = process.env.ADMIN_LOGIN_PASSWORD?.trim();
+    const isPasswordAuthorized =
+      Boolean(expectedPassword) && Boolean(providedPassword) && providedPassword === expectedPassword;
+
+    if (!session && !isPasswordAuthorized) {
       return res.status(401).json({
-        error: "Acces refuse. Connectez-vous au backoffice.",
+        error:
+          "Acces refuse. Connectez-vous au backoffice et renseignez le mot de passe admin dans l'editeur.",
       });
     }
 

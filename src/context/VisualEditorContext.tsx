@@ -2,6 +2,7 @@ import {
   createContext,
   ReactNode,
   useContext,
+  useEffect,
   useState,
 } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -17,7 +18,9 @@ type VisualEditorContextValue = {
   isRequested: boolean;
   isEnabled: boolean;
   isAuthenticated: boolean;
+  adminPassword: string;
   isSaving: boolean;
+  setAdminPassword: (password: string) => void;
   updateField: (path: string, value: unknown) => void;
   clearField: (path: string) => void;
   appendArrayItem: (path: string, value: unknown) => void;
@@ -27,6 +30,7 @@ type VisualEditorContextValue = {
 };
 
 const VISUAL_EDITOR_QUERY_KEY = "edit";
+const VISUAL_EDITOR_PASSWORD_KEY = "akconseil_visual_editor_password";
 
 const cloneContent = <T,>(value: T): T => {
   if (typeof structuredClone === "function") {
@@ -43,7 +47,20 @@ export const VisualEditorProvider = ({ children }: { children: ReactNode }) => {
   const { content, setContentLocally, refresh } = useCmsContent();
   const { isAuthenticated } = useAdminAuth();
 
+  const [adminPassword, setAdminPasswordState] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    const savedPassword = localStorage.getItem(VISUAL_EDITOR_PASSWORD_KEY);
+    if (savedPassword) {
+      setAdminPasswordState(savedPassword);
+    }
+  }, []);
+
+  const setAdminPassword = (password: string) => {
+    setAdminPasswordState(password);
+    localStorage.setItem(VISUAL_EDITOR_PASSWORD_KEY, password);
+  };
 
   const searchParams = new URLSearchParams(location.search);
   const isRequested = searchParams.get(VISUAL_EDITOR_QUERY_KEY) === "1";
@@ -75,6 +92,9 @@ export const VisualEditorProvider = ({ children }: { children: ReactNode }) => {
     if (!isAuthenticated) {
       throw new Error("Connexion admin requise pour publier les changements.");
     }
+    if (!adminPassword.trim()) {
+      throw new Error("Mot de passe admin requis pour publier.");
+    }
 
     setIsSaving(true);
     try {
@@ -82,6 +102,7 @@ export const VisualEditorProvider = ({ children }: { children: ReactNode }) => {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
+          "x-admin-password": adminPassword.trim(),
         },
         body: JSON.stringify({ content }),
       });
@@ -116,7 +137,9 @@ export const VisualEditorProvider = ({ children }: { children: ReactNode }) => {
     isRequested,
     isEnabled,
     isAuthenticated,
+    adminPassword,
     isSaving,
+    setAdminPassword,
     updateField,
     clearField,
     appendArrayItem,

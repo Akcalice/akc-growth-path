@@ -6,7 +6,15 @@ import { useLocation } from "react-router-dom";
 const VisualEditorToolbar = () => {
   const { toast } = useToast();
   const location = useLocation();
-  const { isRequested, isEnabled, isSaving, saveContent, exitEditMode } = useVisualEditor();
+  const {
+    isRequested,
+    isEnabled,
+    adminPassword,
+    isSaving,
+    setAdminPassword,
+    saveContent,
+    exitEditMode,
+  } = useVisualEditor();
   const { isAuthenticated, logout } = useAdminAuth();
 
   if (!isRequested) {
@@ -59,9 +67,13 @@ const VisualEditorToolbar = () => {
     <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[9999] w-[min(96vw,900px)] bg-background border border-border shadow-xl rounded-2xl px-3 py-3 md:px-4 md:py-3">
       <div className="flex flex-col md:flex-row gap-3 md:items-center">
         <div className="text-xs md:text-sm font-semibold">Mode edition visuelle actif</div>
-        <div className="flex-1 text-[11px] md:text-xs text-muted-foreground">
-          Survolez un texte ou une image puis utilisez les actions afficheres.
-        </div>
+        <input
+          type="password"
+          value={adminPassword}
+          onChange={(event) => setAdminPassword(event.target.value)}
+          placeholder="Mot de passe admin pour publier"
+          className="flex-1 px-3 py-2 rounded-lg border border-border bg-background text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+        />
         <div className="flex items-center gap-2 flex-wrap">
           <button
             type="button"
