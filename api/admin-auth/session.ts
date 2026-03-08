@@ -11,13 +11,20 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
   }
   res.setHeader("Cache-Control", "no-store");
 
-  const session = getSessionFromRequest(req);
-  if (!session) {
-    return res.status(200).json({ authenticated: false });
-  }
+  try {
+    const session = getSessionFromRequest(req);
+    if (!session) {
+      return res.status(200).json({ authenticated: false });
+    }
 
-  return res.status(200).json({
-    authenticated: true,
-    email: session.email,
-  });
+    return res.status(200).json({
+      authenticated: true,
+      email: session.email,
+    });
+  } catch (error) {
+    return res.status(200).json({
+      authenticated: false,
+      warning: error instanceof Error ? error.message : "Session invalide",
+    });
+  }
 }

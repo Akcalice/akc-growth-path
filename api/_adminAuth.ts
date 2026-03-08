@@ -11,7 +11,7 @@ type TokenPayload = {
 export type ApiRequest = {
   method?: string;
   body?: unknown;
-  headers: Record<string, string | string[] | undefined>;
+  headers?: Record<string, string | string[] | undefined>;
   query?: Record<string, string | string[] | undefined>;
 };
 
@@ -89,7 +89,8 @@ export const parseJsonBody = (body: unknown) => {
 };
 
 export const parseCookies = (req: ApiRequest) => {
-  const cookieHeader = normalizeHeaderValue(req.headers.cookie);
+  const headers = req.headers || {};
+  const cookieHeader = normalizeHeaderValue(headers.cookie);
   const cookieMap: Record<string, string> = {};
   if (!cookieHeader) {
     return cookieMap;
@@ -113,10 +114,11 @@ export const parseCookies = (req: ApiRequest) => {
 };
 
 export const buildBaseUrl = (req: ApiRequest) => {
-  const host = normalizeHeaderValue(req.headers["x-forwarded-host"]) ||
-    normalizeHeaderValue(req.headers.host);
+  const headers = req.headers || {};
+  const host = normalizeHeaderValue(headers["x-forwarded-host"]) ||
+    normalizeHeaderValue(headers.host);
   const protocol =
-    normalizeHeaderValue(req.headers["x-forwarded-proto"]) || "https";
+    normalizeHeaderValue(headers["x-forwarded-proto"]) || "https";
   if (!host) {
     return "https://www.akconseil.fr";
   }
