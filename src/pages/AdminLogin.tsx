@@ -5,14 +5,13 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
 const AdminLogin = () => {
-  const { startLogin, isAuthenticated, isChecking, refreshSession } = useAdminAuth();
+  const { startLogin, isAuthenticated, isChecking } = useAdminAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [emailSent, setEmailSent] = useState(false);
 
   const nextPath = useMemo(() => {
     const value = new URLSearchParams(location.search).get("next");
@@ -28,27 +27,16 @@ const AdminLogin = () => {
     }
   }, [isChecking, isAuthenticated, navigate, nextPath]);
 
-  const authError = useMemo(() => {
-    const error = new URLSearchParams(location.search).get("error");
-    if (error === "invalid_or_expired_token") {
-      return "Le lien de validation est invalide ou expire. Recommencez la connexion.";
-    }
-    if (error === "missing_token") {
-      return "Lien de validation incomplet. Recommencez la connexion.";
-    }
-    return null;
-  }, [location.search]);
-
   const onSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     try {
       setIsSubmitting(true);
       const message = await startLogin(email, password, nextPath);
-      setEmailSent(true);
       toast({
-        title: "Verification envoyee",
+        title: "Connexion reussie",
         description: message,
       });
+      navigate(nextPath, { replace: true });
     } catch (error) {
       toast({
         title: "Connexion refusee",
@@ -67,14 +55,8 @@ const AdminLogin = () => {
           <div className="bg-card rounded-2xl border border-border p-6 md:p-8">
             <h1 className="font-display text-2xl md:text-3xl font-bold mb-3">Connexion admin</h1>
             <p className="text-sm text-muted-foreground mb-6">
-              Entrez vos identifiants, puis validez via le lien recu par email.
+              Entrez vos identifiants pour acceder au backoffice.
             </p>
-
-            {authError && (
-              <div className="mb-4 rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm">
-                {authError}
-              </div>
-            )}
 
             <form onSubmit={onSubmit} className="space-y-4">
               <div>
@@ -85,7 +67,7 @@ const AdminLogin = () => {
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
                   className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                  placeholder="vous@akconseil.fr"
+                  placeholder="admin@akconseil.fr"
                 />
               </div>
               <div>
@@ -96,7 +78,7 @@ const AdminLogin = () => {
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
                   className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                  placeholder="Votre mot de passe"
+                  placeholder="Mot de passe admin"
                 />
               </div>
 
@@ -105,24 +87,9 @@ const AdminLogin = () => {
                 disabled={isSubmitting}
                 className="w-full px-5 py-3 rounded-full bg-primary text-primary-foreground text-sm font-semibold hover:bg-navy-light transition-colors disabled:opacity-60"
               >
-                {isSubmitting ? "Envoi..." : "Se connecter"}
+                {isSubmitting ? "Connexion..." : "Se connecter"}
               </button>
             </form>
-
-            {emailSent && (
-              <div className="mt-5 p-4 rounded-xl bg-accent/40 text-sm">
-                <p className="mb-3">
-                  Email de validation envoye. Ouvrez votre boite mail puis cliquez sur le lien.
-                </p>
-                <button
-                  type="button"
-                  onClick={() => void refreshSession()}
-                  className="px-4 py-2 rounded-full bg-secondary text-secondary-foreground text-xs font-semibold hover:bg-secondary/90 transition-colors"
-                >
-                  J'ai valide, verifier la session
-                </button>
-              </div>
-            )}
 
             <div className="mt-5 text-xs text-muted-foreground">
               Retour au site :{" "}

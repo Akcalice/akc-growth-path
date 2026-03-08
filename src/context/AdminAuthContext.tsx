@@ -11,66 +11,55 @@ type AdminAuthContextValue = {
 
 const AdminAuthContext = createContext<AdminAuthContextValue | undefined>(undefined);
 
+const ADMIN_AUTH_KEY = "akconseil_admin_auth";
+const ADMIN_AUTH_EMAIL_KEY = "akconseil_admin_email";
+const TEMP_ADMIN_EMAIL = "admin@akconseil.fr";
+const TEMP_ADMIN_PASSWORD = "AKC-Temp-2026!";
+
+const readAuthState = () =>
+  typeof window !== "undefined" && window.localStorage.getItem(ADMIN_AUTH_KEY) === "1";
+
 export const AdminAuthProvider = ({ children }: { children: ReactNode }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isChecking, setIsChecking] = useState(true);
-  const [email, setEmail] = useState<string | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(readAuthState);
+  const [isChecking, setIsChecking] = useState(false);
+  const [email, setEmail] = useState<string | null>(
+    typeof window !== "undefined"
+      ? window.localStorage.getItem(ADMIN_AUTH_EMAIL_KEY) || null
+      : null,
+  );
 
   const refreshSession = async () => {
-    try {
-      setIsChecking(true);
-      const response = await fetch("/api/admin-auth/session", { cache: "no-store" });
-      if (!response.ok) {
-        setIsAuthenticated(false);
-        setEmail(null);
-        return;
-      }
-      const payload = (await response.json()) as {
-        authenticated?: boolean;
-        email?: string;
-      };
-      setIsAuthenticated(Boolean(payload.authenticated));
-      setEmail(payload.authenticated ? payload.email || null : null);
-    } catch {
-      setIsAuthenticated(false);
-      setEmail(null);
-    } finally {
-      setIsChecking(false);
-    }
-  };
-
-  const startLogin = async (loginEmail: string, password: string, nextPath: string) => {
-    const response = await fetch("/api/admin-auth/start", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email: loginEmail,
-        password,
-        next: nextPath,
-      }),
-    });
-
-    const payload = (await response.json().catch(() => ({}))) as {
-      error?: string;
-      message?: string;
-    };
-
-    if (!response.ok) {
-      throw new Error(payload.error || "Connexion impossible.");
-    }
-
-    return (
-      payload.message ||
-      "Email de validation envoye. Ouvrez votre boite mail pour valider la connexion."
+    const nextAuthenticated = readAuthState();
+    setIsAuthenticated(nextAuthenticated);
+    setEmail(
+      nextAuthenticated
+        ? window.localStorage.getItem(ADMIN_AUTH_EMAIL_KEY) || TEMP_ADMIN_EMAIL
+        : null,
     );
   };
 
-  const logout = async () => {
-    try {
-      await fetch("/api/admin-auth/logout", { method: "POST" });
-    } finally {
-      await refreshSession();
+  const startLogin = async (loginEmail: string, password: string, nextPath: string) => {
+    if (!nextPath) {
+      throw new Error("Destination de connexion invalide.");
     }
+    const isValid =
+      loginEmail.trim().toLowerCase() === TEMP_ADMIN_EMAIL &&
+      password === TEMP_ADMIN_PASSWORD;
+    if (!isValid) {
+      throw new Error("Email ou mot de passe incorrect.");
+    }
+    window.localStorage.setItem(ADMIN_AUTH_KEY, "1");
+    window.localStorage.setItem(ADMIN_AUTH_EMAIL_KEY, loginEmail.trim().toLowerCase());
+    setIsAuthenticated(true);
+    setEmail(loginEmail.trim().toLowerCase());
+    return "Connexion reussie.";
+  };
+
+  const logout = async () => {
+    window.localStorage.removeItem(ADMIN_AUTH_KEY);
+    window.localStorage.removeItem(ADMIN_AUTH_EMAIL_KEY);
+    setIsAuthenticated(false);
+    setEmail(null);
   };
 
   useEffect(() => {

@@ -13,6 +13,11 @@ type ApiResponse = {
   setHeader: (name: string, value: string) => void;
 };
 
+declare global {
+  // eslint-disable-next-line no-var
+  var __AK_CONTACT_QUEUE__: Array<Record<string, unknown>> | undefined;
+}
+
 const parseJsonBody = (body: unknown) => {
   if (typeof body === "string" && body.trim().length > 0) {
     return JSON.parse(body) as Record<string, unknown>;
@@ -25,6 +30,19 @@ const parseJsonBody = (body: unknown) => {
 
 const sanitize = (value: unknown) =>
   typeof value === "string" ? value.trim().replace(/\s+/g, " ") : "";
+
+const queueSubmission = (submission: Record<string, unknown>) => {
+  if (!globalThis.__AK_CONTACT_QUEUE__) {
+    globalThis.__AK_CONTACT_QUEUE__ = [];
+  }
+  const queued = {
+    ...submission,
+    queuedAt: new Date().toISOString(),
+    queueId: `queued-${Date.now()}`,
+  };
+  globalThis.__AK_CONTACT_QUEUE__.push(queued);
+  return queued.queueId as string;
+};
 
 export default async function handler(req: ApiRequest, res: ApiResponse) {
   if (req.method !== "POST") {
@@ -141,9 +159,13 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
 
     const resendApiKey = process.env.RESEND_API_KEY?.trim();
     if (!resendApiKey) {
-      return res.status(500).json({
-        error:
-          "Configuration email manquante: configurez SMTP_* ou RESEND_API_KEY sur Vercel.",
+      const queueId = queueSubmission(submission as unknown as Record<string, unknown>);
+      return res.status(200).json({
+        success: true,
+        queued: true,
+        id: queueId,
+        warning:
+          "Configuration email manquante: message mis en file locale (pas d'envoi email).",
       });
     }
 
@@ -164,7 +186,13 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
       const normalizedMessage = lower.includes("api key")
         ? "RESEND_API_KEY invalide ou mal copiee. Verifiez la variable Vercel (sans espace, scope Production)."
         : message;
-      return res.status(502).json({ error: normalizedMessage });
+      const queueId = queueSubmission(submission as unknown as Record<string, unknown>);
+      return res.status(200).json({
+        success: true,
+        queued: true,
+        id: queueId,
+        warning: normalizedMessage,
+      });
     }
 
     const confirmation = await resend.emails.send({
@@ -182,7 +210,13 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
       const normalizedMessage = lower.includes("api key")
         ? "RESEND_API_KEY invalide ou mal copiee. Verifiez la variable Vercel (sans espace, scope Production)."
         : message;
-      return res.status(502).json({ error: normalizedMessage });
+      const queueId = queueSubmission(submission as unknown as Record<string, unknown>);
+      return res.status(200).json({
+        success: true,
+        queued: true,
+        id: queueId,
+        warning: normalizedMessage,
+      });
     }
 
     return res.status(200).json({
