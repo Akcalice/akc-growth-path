@@ -3,81 +3,49 @@ import { Mail, MapPin, Send } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 
-type FallbackState = {
-  mailto: string;
-  gmail: string;
-  plainText: string;
-};
-
 const Contact = () => {
   const { toast } = useToast();
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [fallbackState, setFallbackState] = useState<FallbackState | null>(null);
-
-  const buildFallbackState = () => {
-    const subjectText = `[Contact site] ${form.subject || "Nouveau message"}`;
-    const plainText = [
-      `Nom: ${form.name}`,
-      `Email: ${form.email}`,
-      "",
-      "Message:",
-      form.message,
-    ].join("\n");
-    const subject = encodeURIComponent(subjectText);
-    const body = encodeURIComponent(plainText);
-    const to = encodeURIComponent("contact@akconseil.fr");
-
-    return {
-      mailto: `mailto:contact@akconseil.fr?subject=${subject}&body=${body}`,
-      gmail: `https://mail.google.com/mail/?view=cm&fs=1&to=${to}&su=${subject}&body=${body}`,
-      plainText,
-    };
-  };
-
-  const activateFallback = (description: string) => {
-    const nextFallbackState = buildFallbackState();
-    setFallbackState(nextFallbackState);
-    window.location.href = nextFallbackState.mailto;
-    toast({
-      title: "Envoi alternatif active",
-      description,
-    });
-  };
-
-  const onCopyFallback = async () => {
-    if (!fallbackState) {
-      return;
-    }
-    try {
-      await navigator.clipboard.writeText(fallbackState.plainText);
-      toast({
-        title: "Message copie",
-        description: "Le contenu a ete copie dans le presse-papiers.",
-      });
-    } catch {
-      toast({
-        title: "Copie impossible",
-        description: "Copiez le texte manuellement depuis le formulaire.",
-      });
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setFallbackState(null);
     try {
       setIsSubmitting(true);
-      activateFallback(
-        "Ouverture de votre messagerie pour envoyer le message.",
-      );
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
+      });
+
+      const payload = (await response.json().catch(() => ({}))) as {
+        success?: boolean;
+        error?: string;
+      };
+
+      if (!response.ok || !payload.success) {
+        throw new Error(
+          payload.error ||
+            "Le formulaire ne peut pas envoyer votre message pour le moment.",
+        );
+      }
+
       setForm({ name: "", email: "", subject: "", message: "" });
+      toast({
+        title: "Message envoye",
+        description: "Votre demande a bien ete envoyee. Nous revenons vers vous rapidement.",
+      });
     } catch (error) {
-      activateFallback(
-        error instanceof Error
-          ? error.message
-          : "Une erreur est survenue. Utilisez l'envoi via votre messagerie.",
-      );
+      toast({
+        title: "Envoi impossible",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Une erreur est survenue. Merci de reessayer dans un instant.",
+      });
+      console.error("Erreur formulaire contact:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -98,7 +66,6 @@ const Contact = () => {
           </div>
 
           <div className="grid md:grid-cols-2 gap-12 max-w-5xl mx-auto">
-            {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
                 <label className="block text-sm font-medium mb-1.5">Nom complet</label>
@@ -147,44 +114,12 @@ const Contact = () => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="inline-flex items-center justify-center w-full px-8 py-4 rounded-full bg-primary text-primary-foreground font-semibold hover:bg-navy-light transition-colors"
+                className="inline-flex items-center justify-center w-full px-8 py-4 rounded-full bg-primary text-primary-foreground font-semibold hover:bg-navy-light transition-colors disabled:opacity-60"
               >
                 {isSubmitting ? "Envoi..." : "Envoyer"} <Send size={16} className="ml-2" />
               </button>
-
-              {fallbackState && (
-                <div className="rounded-xl border border-border bg-accent/40 px-4 py-3 text-sm text-muted-foreground">
-                  <p className="mb-3">
-                    Envoi direct indisponible pour le moment. Choisissez une option :
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    <a
-                      href={fallbackState.mailto}
-                      className="inline-flex items-center px-3 py-2 rounded-full bg-primary text-primary-foreground text-xs font-semibold hover:bg-navy-light transition-colors"
-                    >
-                      Ouvrir ma messagerie
-                    </a>
-                    <a
-                      href={fallbackState.gmail}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center px-3 py-2 rounded-full bg-secondary text-secondary-foreground text-xs font-semibold hover:bg-secondary/90 transition-colors"
-                    >
-                      Ouvrir Gmail Web
-                    </a>
-                    <button
-                      type="button"
-                      onClick={() => void onCopyFallback()}
-                      className="inline-flex items-center px-3 py-2 rounded-full bg-secondary text-secondary-foreground text-xs font-semibold hover:bg-secondary/90 transition-colors"
-                    >
-                      Copier le message
-                    </button>
-                  </div>
-                </div>
-              )}
             </form>
 
-            {/* Info */}
             <div className="space-y-8">
               <div className="bg-accent/50 rounded-2xl p-8">
                 <h3 className="font-display text-xl font-bold mb-6">Informations de contact</h3>
