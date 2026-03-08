@@ -1,13 +1,15 @@
 import Layout from "@/components/Layout";
 import { Link } from "react-router-dom";
-import drawingEducation from "@/assets/drawing-education.svg";
-import drawingInsertion from "@/assets/drawing-insertion.svg";
 import { GraduationCap, Users, Briefcase, Building2, User, ArrowRight } from "lucide-react";
 import { useCmsContent } from "@/context/CmsContentContext";
 import { imageMap } from "@/content/imageMap";
 
 const serviceIcons = [GraduationCap, Users, Briefcase];
 const audienceIcons = [User, Building2];
+const serviceImageOverrides = [
+  "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1600&q=80",
+  "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1600&q=80",
+];
 
 const Services = () => {
   const { content } = useCmsContent();
@@ -31,11 +33,9 @@ const Services = () => {
           {page.items.map((item, index) => {
             const ServiceIcon = serviceIcons[index] ?? Briefcase;
             const image =
-              index === 0
-                ? drawingEducation
-                : index === 1
-                  ? drawingInsertion
-                  : imageMap[item.imageKey as keyof typeof imageMap] ?? imageMap.illusEducation;
+              serviceImageOverrides[index] ||
+              imageMap[item.imageKey as keyof typeof imageMap] ||
+              imageMap.illusEducation;
             return (
             <div key={`${item.title}-${index}`} className={`grid md:grid-cols-2 gap-10 items-center`}>
               <div className={index % 2 === 1 ? "md:order-2" : ""}>

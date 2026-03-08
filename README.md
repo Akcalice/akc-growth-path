@@ -18,11 +18,25 @@ npm run build
 
 Le formulaire appelle `POST /api/contact`.
 
-Variables d'environnement Vercel a definir :
+Variables d'environnement Vercel recommandees :
 
-- `RESEND_API_KEY` (obligatoire)
-- `RESEND_FROM_EMAIL` (recommande)
-- `CONTACT_TO_EMAIL` (recommande)
+- SMTP (prioritaire) :
+  - `SMTP_HOST`
+  - `SMTP_PORT`
+  - `SMTP_USER`
+  - `SMTP_PASSWORD`
+  - `SMTP_FROM`
+  - `NOTIFICATION_EMAIL`
+- Ou Resend :
+  - `RESEND_API_KEY`
+  - `RESEND_FROM_EMAIL`
+  - `CONTACT_TO_EMAIL`
+
+Sauvegarde en base (optionnelle) :
+
+- `MONGODB_URI`
+- `MONGODB_DB` (defaut: `akconseil`)
+- `MONGODB_COLLECTION` (defaut: `contact_submissions`)
 
 ## Login admin temporaire
 
@@ -30,6 +44,7 @@ Routes :
 
 - `/admin-login`
 - `/admin-dashboard` (protege)
+- `/page-builder` (editeur visuel avance)
 
 Identifiants temporaires par defaut :
 

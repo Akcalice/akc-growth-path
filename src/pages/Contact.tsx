@@ -9,7 +9,14 @@ const Contact = () => {
   const { content } = useCmsContent();
   const page = content.contactPage;
   const calendlyUrl = content.site.calendlyUrl;
-  const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    service: "",
+    subject: "",
+    message: "",
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -39,7 +46,14 @@ const Contact = () => {
         title: page.form.successTitle,
         description: page.form.successDescription,
       });
-      setForm({ name: "", email: "", subject: "", message: "" });
+      setForm({
+        name: "",
+        email: "",
+        phone: "",
+        service: "",
+        subject: "",
+        message: "",
+      });
     } catch (error) {
       toast({
         title: page.form.errorTitle,
@@ -100,6 +114,30 @@ const Contact = () => {
                   className="w-full px-4 py-3 rounded-xl border border-border bg-background focus:ring-2 focus:ring-ring focus:outline-none text-sm"
                   placeholder={page.form.subjectPlaceholder}
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1.5">Telephone</label>
+                <input
+                  type="tel"
+                  value={form.phone}
+                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl border border-border bg-background focus:ring-2 focus:ring-ring focus:outline-none text-sm"
+                  placeholder="06 00 00 00 00"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1.5">Service souhaite</label>
+                <select
+                  value={form.service}
+                  onChange={(e) => setForm({ ...form, service: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl border border-border bg-background focus:ring-2 focus:ring-ring focus:outline-none text-sm"
+                >
+                  <option value="">Selectionner un service</option>
+                  <option value="Accompagnement educatif">Accompagnement educatif</option>
+                  <option value="Insertion & orientation">Insertion & orientation</option>
+                  <option value="Coaching professionnel">Coaching professionnel</option>
+                  <option value="Autre">Autre</option>
+                </select>
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1.5">{page.form.messageLabel}</label>

@@ -1,4 +1,6 @@
 import { Resend } from "resend";
+import nodemailer from "nodemailer";
+import { MongoClient } from "mongodb";
 
 type ApiRequest = {
   method?: string;
@@ -34,7 +36,9 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     const payload = parseJsonBody(req.body);
     const name = sanitize(payload.name);
     const email = sanitize(payload.email);
-    const subject = sanitize(payload.subject);
+    const phone = sanitize(payload.phone);
+    const service = sanitize(payload.service);
+    const subject = sanitize(payload.subject || service || "Demande de contact");
     const message =
       typeof payload.message === "string" ? payload.message.trim() : "";
 
@@ -47,55 +51,126 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
       return res.status(400).json({ error: "Adresse email invalide." });
     }
 
+    const submittedAt = new Date();
+    const submission = {
+      name,
+      email,
+      phone: phone || null,
+      service: service || null,
+      subject,
+      message,
+      submittedAt,
+      status: "new",
+    };
+
+    let dbId: string | null = null;
+    const mongoUri = process.env.MONGODB_URI;
+    if (mongoUri) {
+      const client = await MongoClient.connect(mongoUri);
+      try {
+        const dbName = process.env.MONGODB_DB || "akconseil";
+        const collection = process.env.MONGODB_COLLECTION || "contact_submissions";
+        const db = client.db(dbName);
+        const result = await db.collection(collection).insertOne(submission);
+        dbId = result.insertedId.toString();
+      } finally {
+        await client.close();
+      }
+    }
+
+    const notificationHtml = `
+      <h2>Nouvelle demande de contact</h2>
+      <p><strong>Nom :</strong> ${name}</p>
+      <p><strong>Email :</strong> ${email}</p>
+      <p><strong>Telephone :</strong> ${phone || "Non renseigne"}</p>
+      <p><strong>Service :</strong> ${service || "Non specifie"}</p>
+      <p><strong>Sujet :</strong> ${subject}</p>
+      <p><strong>Message :</strong></p>
+      <p>${message.replace(/\n/g, "<br/>")}</p>
+      <hr />
+      <p><small>Recu le ${submittedAt.toLocaleString("fr-FR")}</small></p>
+    `;
+
+    const clientHtml = `
+      <h2>Merci pour votre message, ${name}</h2>
+      <p>Nous avons bien recu votre demande concernant : <strong>${service || subject}</strong></p>
+      <p>Nous vous repondrons dans les plus brefs delais.</p>
+      <p>Cordialement,<br/>AKConseil</p>
+    `;
+
+    const smtpHost = process.env.SMTP_HOST;
+    const smtpUser = process.env.SMTP_USER;
+    const smtpPassword = process.env.SMTP_PASSWORD;
+    const smtpFrom = process.env.SMTP_FROM || process.env.RESEND_FROM_EMAIL || "AKConseil <onboarding@resend.dev>";
+    const notificationEmail = process.env.NOTIFICATION_EMAIL || process.env.CONTACT_TO_EMAIL || "contact@akconseil.fr";
+
+    if (smtpHost && smtpUser && smtpPassword) {
+      const transporter = nodemailer.createTransport({
+        host: smtpHost,
+        port: Number(process.env.SMTP_PORT || 587),
+        secure: false,
+        auth: {
+          user: smtpUser,
+          pass: smtpPassword,
+        },
+      });
+
+      await transporter.sendMail({
+        from: smtpFrom,
+        to: notificationEmail,
+        replyTo: email,
+        subject: `Nouvelle demande de contact - ${service || "Non specifie"}`,
+        html: notificationHtml,
+      });
+
+      await transporter.sendMail({
+        from: smtpFrom,
+        to: email,
+        subject: "Confirmation de votre demande - AKConseil",
+        html: clientHtml,
+      });
+
+      return res.status(200).json({ success: true, id: dbId });
+    }
+
     const resendApiKey = process.env.RESEND_API_KEY;
     if (!resendApiKey) {
       return res.status(500).json({
         error:
-          "Configuration manquante sur Vercel: RESEND_API_KEY doit etre defini.",
+          "Configuration email manquante: configurez SMTP_* ou RESEND_API_KEY sur Vercel.",
       });
     }
 
     const resend = new Resend(resendApiKey);
-    const fromEmail =
-      process.env.RESEND_FROM_EMAIL || "AKConseil <onboarding@resend.dev>";
-    const toEmail = process.env.CONTACT_TO_EMAIL || "contact@akconseil.fr";
-
-    const text = [
-      "Nouveau message depuis le formulaire AKConseil",
-      "",
-      `Nom: ${name}`,
-      `Email: ${email}`,
-      `Sujet: ${subject}`,
-      "",
-      "Message:",
-      message,
-    ].join("\n");
-
-    const html = `
-      <h2>Nouveau message depuis le formulaire AKConseil</h2>
-      <p><strong>Nom:</strong> ${name}</p>
-      <p><strong>Email:</strong> ${email}</p>
-      <p><strong>Sujet:</strong> ${subject}</p>
-      <p><strong>Message:</strong></p>
-      <p>${message.replace(/\n/g, "<br/>")}</p>
-    `;
-
-    const sendResult = await resend.emails.send({
-      from: fromEmail,
-      to: [toEmail],
+    const notification = await resend.emails.send({
+      from: smtpFrom,
+      to: [notificationEmail],
       replyTo: email,
-      subject: `[AKConseil] ${subject}`,
-      text,
-      html,
+      subject: `Nouvelle demande de contact - ${service || "Non specifie"}`,
+      html: notificationHtml,
+      text: `Nom: ${name}\nEmail: ${email}\nTelephone: ${phone || "Non renseigne"}\nService: ${service || "Non specifie"}\nSujet: ${subject}\n\n${message}`,
     });
 
-    if (sendResult.error) {
-      return res.status(502).json({
-        error: sendResult.error.message || "Echec d'envoi de l'email.",
-      });
+    if (notification.error) {
+      return res.status(502).json({ error: notification.error.message || "Echec d'envoi de l'email de notification." });
     }
 
-    return res.status(200).json({ success: true, id: sendResult.data?.id ?? null });
+    const confirmation = await resend.emails.send({
+      from: smtpFrom,
+      to: [email],
+      subject: "Confirmation de votre demande - AKConseil",
+      html: clientHtml,
+      text: `Merci pour votre message ${name}. Nous vous repondrons rapidement.`,
+    });
+
+    if (confirmation.error) {
+      return res.status(502).json({ error: confirmation.error.message || "Echec d'envoi de l'email de confirmation." });
+    }
+
+    return res.status(200).json({
+      success: true,
+      id: notification.data?.id ?? dbId,
+    });
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Erreur inconnue lors de l'envoi.";

@@ -1,7 +1,5 @@
 import { Link } from "react-router-dom";
 import Layout from "@/components/Layout";
-import drawingEducation from "@/assets/drawing-education.svg";
-import drawingInsertion from "@/assets/drawing-insertion.svg";
 import { GraduationCap, Users, Briefcase, ArrowRight, Star, ChevronRight } from "lucide-react";
 import {
   Accordion,
@@ -16,6 +14,10 @@ import EditableImage from "@/components/visual-editor/EditableImage";
 import EditableArrayActions from "@/components/visual-editor/EditableArrayActions";
 
 const serviceIcons = [GraduationCap, Users, Briefcase];
+const serviceImageOverrides = [
+  "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1600&q=80",
+  "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1600&q=80",
+];
 
 const Index = () => {
   const { content } = useCmsContent();
@@ -97,11 +99,7 @@ const Index = () => {
           {home.services.map((service, index) => {
             const ServiceIcon = serviceIcons[index] ?? Briefcase;
             const serviceImage =
-              index === 0
-                ? drawingEducation
-                : index === 1
-                  ? drawingInsertion
-                  : resolveImageSrc(service.imageKey, imageMap.booksHero);
+              serviceImageOverrides[index] || resolveImageSrc(service.imageKey, imageMap.booksHero);
             return (
             <div key={`${service.title}-${index}`} className="group relative bg-background rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
               <div className="absolute mt-2 ml-2 z-10">

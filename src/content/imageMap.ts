@@ -10,6 +10,11 @@ import illusGrowth from "@/assets/illus-growth.jpg";
 import illusInsertion from "@/assets/illus-insertion.jpg";
 import illusWellbeing from "@/assets/illus-wellbeing.jpg";
 
+const counselingEducationPhoto =
+  "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1600&q=80";
+const orientationCareerPhoto =
+  "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1600&q=80";
+
 export const imageMap = {
   booksHero,
   booksStudy,
@@ -22,6 +27,8 @@ export const imageMap = {
   illusGrowth,
   illusInsertion,
   illusWellbeing,
+  counselingEducationPhoto,
+  orientationCareerPhoto,
 } as const;
 
 export type ImageKey = keyof typeof imageMap;

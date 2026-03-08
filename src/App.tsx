@@ -21,6 +21,7 @@ import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
+import PageBuilder from "./pages/PageBuilder";
 
 const queryClient = new QueryClient();
 
@@ -50,6 +51,14 @@ const App = () => (
                   element={
                     <ProtectedAdminRoute>
                       <AdminDashboard />
+                    </ProtectedAdminRoute>
+                  }
+                />
+                <Route
+                  path="/page-builder"
+                  element={
+                    <ProtectedAdminRoute>
+                      <PageBuilder />
                     </ProtectedAdminRoute>
                   }
                 />

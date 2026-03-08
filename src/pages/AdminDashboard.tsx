@@ -27,12 +27,20 @@ const AdminDashboard = () => {
               <p className="text-sm text-muted-foreground mb-4">
                 Mode edition visuelle du site pour ajuster les textes et contenus.
               </p>
-              <a
-                href="/?edit=1"
-                className="inline-flex items-center px-5 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-semibold hover:bg-navy-light transition-colors"
-              >
-                Ouvrir l'editeur
-              </a>
+              <div className="flex flex-wrap gap-2">
+                <a
+                  href="/?edit=1"
+                  className="inline-flex items-center px-5 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-semibold hover:bg-navy-light transition-colors"
+                >
+                  Ouvrir l'editeur rapide
+                </a>
+                <Link
+                  to="/page-builder"
+                  className="inline-flex items-center px-5 py-2.5 rounded-full bg-secondary text-secondary-foreground text-sm font-semibold hover:bg-secondary/90 transition-colors"
+                >
+                  Ouvrir le page builder
+                </Link>
+              </div>
             </div>
 
             <div className="bg-card rounded-2xl border border-border p-6">

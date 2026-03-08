@@ -249,13 +249,13 @@ export const defaultCmsContent: CmsContent = {
         title: "Accompagnement educatif",
         description:
           "Orientation, ecoute attentive et soutien dans la gestion de situations complexes : education, developpement personnel et equilibre familial.",
-        imageKey: "familySupport",
+        imageKey: "counselingEducationPhoto",
       },
       {
         title: "Insertion & orientation",
         description:
           "Ateliers cibles et temps d'echange pour definir un projet clair, valoriser vos competences et reprendre confiance en votre parcours.",
-        imageKey: "coachingSession",
+        imageKey: "orientationCareerPhoto",
       },
       {
         title: "Coaching professionnel",
@@ -391,7 +391,7 @@ export const defaultCmsContent: CmsContent = {
         description:
           "Orientation, ecoute attentive et soutien dans la gestion de situations complexes : education, developpement personnel et equilibre familial.",
         forWho: "Parents, familles, jeunes",
-        imageKey: "illusEducation",
+        imageKey: "counselingEducationPhoto",
         learnMoreLabel: "En savoir plus",
       },
       {
@@ -399,7 +399,7 @@ export const defaultCmsContent: CmsContent = {
         description:
           "Ateliers cibles, bilans de competences et temps d'echange pour definir un projet clair, valoriser vos competences et reprendre confiance.",
         forWho: "Personnes en reconversion, demandeurs d'emploi",
-        imageKey: "illusInsertion",
+        imageKey: "orientationCareerPhoto",
         learnMoreLabel: "En savoir plus",
       },
       {
