@@ -13,7 +13,7 @@ import illusWellbeing from "@/assets/illus-wellbeing.jpg";
 const counselingEducationPhoto =
   "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1600&q=80";
 const orientationCareerPhoto =
-  "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1600&q=80";
+  "https://images.pexels.com/photos/29267517/pexels-photo-29267517.jpeg?auto=compress&cs=tinysrgb&w=1600";
 
 export const imageMap = {
   booksHero,

@@ -4,6 +4,7 @@ type AdminAuthContextValue = {
   isAuthenticated: boolean;
   isChecking: boolean;
   email: string | null;
+  publishPassword: string | null;
   refreshSession: () => Promise<void>;
   startLogin: (email: string, password: string, nextPath: string) => Promise<string>;
   logout: () => Promise<void>;
@@ -13,6 +14,7 @@ const AdminAuthContext = createContext<AdminAuthContextValue | undefined>(undefi
 
 const ADMIN_AUTH_KEY = "akconseil_admin_auth";
 const ADMIN_AUTH_EMAIL_KEY = "akconseil_admin_email";
+const ADMIN_AUTH_PASSWORD_KEY = "akconseil_admin_password";
 const TEMP_ADMIN_EMAIL = "admin@akconseil.fr";
 const TEMP_ADMIN_PASSWORD = "AKC-Temp-2026!";
 
@@ -27,6 +29,11 @@ export const AdminAuthProvider = ({ children }: { children: ReactNode }) => {
       ? window.localStorage.getItem(ADMIN_AUTH_EMAIL_KEY) || null
       : null,
   );
+  const [publishPassword, setPublishPassword] = useState<string | null>(
+    typeof window !== "undefined"
+      ? window.localStorage.getItem(ADMIN_AUTH_PASSWORD_KEY) || null
+      : null,
+  );
 
   const refreshSession = async () => {
     const nextAuthenticated = readAuthState();
@@ -35,6 +42,9 @@ export const AdminAuthProvider = ({ children }: { children: ReactNode }) => {
       nextAuthenticated
         ? window.localStorage.getItem(ADMIN_AUTH_EMAIL_KEY) || TEMP_ADMIN_EMAIL
         : null,
+    );
+    setPublishPassword(
+      nextAuthenticated ? window.localStorage.getItem(ADMIN_AUTH_PASSWORD_KEY) || null : null,
     );
   };
 
@@ -50,16 +60,20 @@ export const AdminAuthProvider = ({ children }: { children: ReactNode }) => {
     }
     window.localStorage.setItem(ADMIN_AUTH_KEY, "1");
     window.localStorage.setItem(ADMIN_AUTH_EMAIL_KEY, loginEmail.trim().toLowerCase());
+    window.localStorage.setItem(ADMIN_AUTH_PASSWORD_KEY, password);
     setIsAuthenticated(true);
     setEmail(loginEmail.trim().toLowerCase());
+    setPublishPassword(password);
     return "Connexion reussie.";
   };
 
   const logout = async () => {
     window.localStorage.removeItem(ADMIN_AUTH_KEY);
     window.localStorage.removeItem(ADMIN_AUTH_EMAIL_KEY);
+    window.localStorage.removeItem(ADMIN_AUTH_PASSWORD_KEY);
     setIsAuthenticated(false);
     setEmail(null);
+    setPublishPassword(null);
   };
 
   useEffect(() => {
@@ -70,6 +84,7 @@ export const AdminAuthProvider = ({ children }: { children: ReactNode }) => {
     isAuthenticated,
     isChecking,
     email,
+    publishPassword,
     refreshSession,
     startLogin,
     logout,

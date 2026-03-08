@@ -1,12 +1,12 @@
 import Layout from "@/components/Layout";
 import { CmsBlogPost, CmsContent } from "@/content/defaultCmsContent";
 import { imageMap, resolveImageSrc } from "@/content/imageMap";
+import { useAdminAuth } from "@/context/AdminAuthContext";
 import { useCmsContent } from "@/context/CmsContentContext";
 import { useToast } from "@/hooks/use-toast";
 import { useEffect, useMemo, useState } from "react";
 
 type SaveState = "idle" | "saving" | "saved" | "error";
-const PAGE_BUILDER_PASSWORD_KEY = "akconseil_page_builder_password";
 
 const cloneContent = <T,>(value: T): T => {
   if (typeof structuredClone === "function") {
@@ -57,22 +57,15 @@ const saveStatusLabel: Record<SaveState, string> = {
 
 const PageBuilder = () => {
   const { content, setContentLocally, refresh } = useCmsContent();
+  const { publishPassword } = useAdminAuth();
   const { toast } = useToast();
   const [draft, setDraft] = useState<CmsContent>(content);
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [selectedPostIndex, setSelectedPostIndex] = useState(0);
-  const [adminPassword, setAdminPassword] = useState("");
 
   useEffect(() => {
     setDraft(content);
   }, [content]);
-
-  useEffect(() => {
-    const savedPassword = window.localStorage.getItem(PAGE_BUILDER_PASSWORD_KEY);
-    if (savedPassword) {
-      setAdminPassword(savedPassword);
-    }
-  }, []);
 
   const selectedPost = draft.blog.posts[selectedPostIndex] || null;
 
@@ -87,12 +80,12 @@ const PageBuilder = () => {
 
   const saveNow = async (options?: { silent?: boolean }) => {
     const silent = options?.silent ?? false;
-    if (!adminPassword.trim()) {
+    if (!publishPassword?.trim()) {
       setSaveState("error");
       if (!silent) {
         toast({
-          title: "Mot de passe requis",
-          description: "Renseignez le mot de passe admin pour publier les modifications.",
+          title: "Session admin invalide",
+          description: "Reconnectez-vous au backoffice pour publier.",
         });
       }
       return;
@@ -104,7 +97,7 @@ const PageBuilder = () => {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          "x-admin-password": adminPassword.trim(),
+          "x-admin-password": publishPassword.trim(),
         },
         body: JSON.stringify({ content: draft }),
       });
@@ -141,7 +134,7 @@ const PageBuilder = () => {
     if (saveState === "saving" || saveState === "saved") {
       return;
     }
-    if (!adminPassword.trim()) {
+    if (!publishPassword?.trim()) {
       return;
     }
     const timeout = window.setTimeout(() => {
@@ -150,7 +143,7 @@ const PageBuilder = () => {
     return () => {
       window.clearTimeout(timeout);
     };
-  }, [draft, adminPassword]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [draft, publishPassword]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const serviceImageRows = useMemo(
     () => [
@@ -186,17 +179,6 @@ const PageBuilder = () => {
                 </p>
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                <input
-                  type="password"
-                  value={adminPassword}
-                  onChange={(event) => {
-                    const value = event.target.value;
-                    setAdminPassword(value);
-                    window.localStorage.setItem(PAGE_BUILDER_PASSWORD_KEY, value);
-                  }}
-                  placeholder="Mot de passe admin (publication)"
-                  className="px-3 py-2 rounded-lg border border-border bg-background text-xs md:text-sm min-w-[240px]"
-                />
                 <span className="rounded-full bg-accent px-3 py-1 text-xs">
                   {saveStatusLabel[saveState]}
                 </span>
