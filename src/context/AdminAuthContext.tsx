@@ -31,7 +31,8 @@ export const AdminAuthProvider = ({ children }: { children: ReactNode }) => {
   );
   const [publishPassword, setPublishPassword] = useState<string | null>(
     typeof window !== "undefined"
-      ? window.localStorage.getItem(ADMIN_AUTH_PASSWORD_KEY) || null
+      ? window.localStorage.getItem(ADMIN_AUTH_PASSWORD_KEY) ||
+          (window.localStorage.getItem(ADMIN_AUTH_KEY) === "1" ? TEMP_ADMIN_PASSWORD : null)
       : null,
   );
 
@@ -44,7 +45,9 @@ export const AdminAuthProvider = ({ children }: { children: ReactNode }) => {
         : null,
     );
     setPublishPassword(
-      nextAuthenticated ? window.localStorage.getItem(ADMIN_AUTH_PASSWORD_KEY) || null : null,
+      nextAuthenticated
+        ? window.localStorage.getItem(ADMIN_AUTH_PASSWORD_KEY) || TEMP_ADMIN_PASSWORD
+        : null,
     );
   };
 

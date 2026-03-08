@@ -36,6 +36,9 @@ const Contact = () => {
       const payload = (await response.json().catch(() => ({}))) as {
         success?: boolean;
         error?: string;
+        queued?: boolean;
+        warning?: string;
+        provider?: string;
       };
 
       if (!response.ok || !payload.success) {
@@ -44,10 +47,19 @@ const Contact = () => {
         );
       }
 
-      toast({
-        title: page.form.successTitle,
-        description: page.form.successDescription,
-      });
+      if (payload.queued) {
+        toast({
+          title: "Message enregistre",
+          description:
+            payload.warning ||
+            "Votre message est bien enregistre mais l'email n'a pas encore pu etre envoye.",
+        });
+      } else {
+        toast({
+          title: page.form.successTitle,
+          description: page.form.successDescription,
+        });
+      }
       setForm({
         name: "",
         email: "",

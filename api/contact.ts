@@ -31,6 +31,16 @@ const parseJsonBody = (body: unknown) => {
 const sanitize = (value: unknown) =>
   typeof value === "string" ? value.trim().replace(/\s+/g, " ") : "";
 
+const getFirstEnv = (keys: string[]) => {
+  for (const key of keys) {
+    const value = process.env[key];
+    if (typeof value === "string" && value.trim()) {
+      return value.trim();
+    }
+  }
+  return "";
+};
+
 const queueSubmission = (submission: Record<string, unknown>) => {
   if (!globalThis.__AK_CONTACT_QUEUE__) {
     globalThis.__AK_CONTACT_QUEUE__ = [];
@@ -116,54 +126,64 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
       <p>Cordialement,<br/>AKConseil</p>
     `;
 
-    const smtpHost = process.env.SMTP_HOST?.trim();
-    const smtpUser = process.env.SMTP_USER?.trim();
-    const smtpPassword = process.env.SMTP_PASSWORD;
+    const smtpHost = getFirstEnv(["SMTP_HOST", "MAIL_HOST"]);
+    const smtpUser = getFirstEnv(["SMTP_USER", "SMTP_USERNAME", "MAIL_USER", "MAIL_USERNAME"]);
+    const smtpPassword =
+      process.env.SMTP_PASSWORD ||
+      process.env.SMTP_PASS ||
+      process.env.MAIL_PASSWORD ||
+      process.env.MAIL_PASS ||
+      "";
+    const smtpPort = Number(getFirstEnv(["SMTP_PORT", "MAIL_PORT"]) || "587");
+    const smtpSecure = getFirstEnv(["SMTP_SECURE", "MAIL_SECURE"]) === "true" || smtpPort === 465;
     const smtpFrom =
-      process.env.SMTP_FROM?.trim() ||
-      process.env.RESEND_FROM_EMAIL?.trim() ||
+      getFirstEnv(["SMTP_FROM", "MAIL_FROM", "RESEND_FROM_EMAIL"]) ||
       "AKConseil <onboarding@resend.dev>";
     const notificationEmail =
-      process.env.NOTIFICATION_EMAIL?.trim() ||
-      process.env.CONTACT_TO_EMAIL?.trim() ||
+      getFirstEnv(["NOTIFICATION_EMAIL", "CONTACT_TO_EMAIL", "CONTACT_EMAIL", "ADMIN_LOGIN_EMAIL"]) ||
       "contact@akconseil.fr";
 
     if (smtpHost && smtpUser && smtpPassword) {
-      const transporter = nodemailer.createTransport({
-        host: smtpHost,
-        port: Number(process.env.SMTP_PORT || 587),
-        secure: false,
-        auth: {
-          user: smtpUser,
-          pass: smtpPassword,
-        },
-      });
+      try {
+        const transporter = nodemailer.createTransport({
+          host: smtpHost,
+          port: smtpPort,
+          secure: smtpSecure,
+          auth: {
+            user: smtpUser,
+            pass: smtpPassword,
+          },
+        });
 
-      await transporter.sendMail({
-        from: smtpFrom,
-        to: notificationEmail,
-        replyTo: email,
-        subject: `Nouvelle demande de contact - ${service || "Non specifie"}`,
-        html: notificationHtml,
-      });
+        await transporter.sendMail({
+          from: smtpFrom,
+          to: notificationEmail,
+          replyTo: email,
+          subject: `Nouvelle demande de contact - ${service || "Non specifie"}`,
+          html: notificationHtml,
+        });
 
-      await transporter.sendMail({
-        from: smtpFrom,
-        to: email,
-        subject: "Confirmation de votre demande - AKConseil",
-        html: clientHtml,
-      });
+        await transporter.sendMail({
+          from: smtpFrom,
+          to: email,
+          subject: "Confirmation de votre demande - AKConseil",
+          html: clientHtml,
+        });
 
-      return res.status(200).json({ success: true, id: dbId });
+        return res.status(200).json({ success: true, id: dbId, provider: "smtp" });
+      } catch {
+        // Fallback vers Resend / file locale si SMTP echoue
+      }
     }
 
-    const resendApiKey = process.env.RESEND_API_KEY?.trim();
+    const resendApiKey = getFirstEnv(["RESEND_API_KEY", "RESEND_KEY"]);
     if (!resendApiKey) {
       const queueId = queueSubmission(submission as unknown as Record<string, unknown>);
       return res.status(200).json({
         success: true,
         queued: true,
         id: queueId,
+        provider: "queue",
         warning:
           "Configuration email manquante: message mis en file locale (pas d'envoi email).",
       });
@@ -191,6 +211,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
         success: true,
         queued: true,
         id: queueId,
+        provider: "queue",
         warning: normalizedMessage,
       });
     }
@@ -215,6 +236,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
         success: true,
         queued: true,
         id: queueId,
+        provider: "queue",
         warning: normalizedMessage,
       });
     }
@@ -222,6 +244,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     return res.status(200).json({
       success: true,
       id: notification.data?.id ?? dbId,
+      provider: "resend",
     });
   } catch (error) {
     const message =
