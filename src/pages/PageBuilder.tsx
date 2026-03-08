@@ -1,704 +1,562 @@
-import { useEffect, useMemo, useState } from "react";
 import Layout from "@/components/Layout";
-import {
-  DndContext,
-  DragEndEvent,
-  PointerSensor,
-  closestCenter,
-  useDraggable,
-  useDroppable,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
-import {
-  SortableContext,
-  useSortable,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import InlineRichText from "@/components/page-builder/InlineRichText";
-import { createSectionFromType } from "@/lib/pageBuilderTemplates";
-import { usePageBuilderStore } from "@/store/usePageBuilderStore";
-import {
-  BuilderSection,
-  BuilderSectionType,
-  BuilderSidebarTab,
-  BuilderViewport,
-} from "@/types/pageBuilder";
+import { CmsBlogPost, CmsContent } from "@/content/defaultCmsContent";
+import { imageMap, resolveImageSrc } from "@/content/imageMap";
+import { useCmsContent } from "@/context/CmsContentContext";
+import { useToast } from "@/hooks/use-toast";
+import { useEffect, useMemo, useState } from "react";
 
-const sectionTypes: BuilderSectionType[] = [
-  "hero",
-  "features",
-  "testimonials",
-  "blog",
-  "contact",
-  "custom",
-];
+type SaveState = "idle" | "saving" | "saved" | "error";
 
-const sectionTypeLabel: Record<BuilderSectionType, string> = {
-  hero: "Hero",
-  features: "Features",
-  testimonials: "Testimonials",
-  blog: "Blog",
-  contact: "Contact",
-  custom: "Custom",
+const cloneContent = <T,>(value: T): T => {
+  if (typeof structuredClone === "function") {
+    return structuredClone(value);
+  }
+  return JSON.parse(JSON.stringify(value)) as T;
 };
 
-const viewportClass: Record<BuilderViewport, string> = {
-  desktop: "max-w-[1200px]",
-  tablet: "max-w-[860px]",
-  mobile: "max-w-[430px]",
-};
+const createSlug = (value: string) =>
+  value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
 
-const saveStatusLabel = {
+const createEmptyPost = (): CmsBlogPost => ({
+  slug: `nouvel-article-${Date.now()}`,
+  title: "Nouvel article",
+  metaTitle: "Nouvel article | AKConseil",
+  metaDescription: "Description de l'article",
+  excerpt: "Resume de l'article",
+  category: "Educatif",
+  imageKey: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1600&q=80",
+  imageAlt: "Illustration article",
+  publishedAt: new Date().toISOString().slice(0, 10),
+  updatedAt: new Date().toISOString().slice(0, 10),
+  readingTime: "5 min",
+  author: "AKConseil",
+  keywords: ["accompagnement"],
+  sections: [
+    {
+      heading: "Introduction",
+      paragraphs: ["Ecrivez ici le contenu de votre article."],
+      bullets: [],
+    },
+  ],
+});
+
+const saveStatusLabel: Record<SaveState, string> = {
   idle: "Aucune modification",
   saving: "Sauvegarde...",
   saved: "Sauvegarde",
-  error: "Erreur",
-};
-
-const AddSectionCard = ({ type }: { type: BuilderSectionType }) => {
-  const { addSection } = usePageBuilderStore();
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
-    id: `template-${type}`,
-    data: { kind: "template", type },
-  });
-
-  return (
-    <button
-      ref={setNodeRef}
-      type="button"
-      onClick={() => addSection(type)}
-      {...listeners}
-      {...attributes}
-      className={`w-full rounded-xl border border-border bg-background px-4 py-3 text-left text-sm transition hover:border-primary ${
-        isDragging ? "opacity-50" : ""
-      }`}
-    >
-      + Ajouter {sectionTypeLabel[type]}
-    </button>
-  );
-};
-
-const StructureItem = ({ section }: { section: BuilderSection }) => {
-  const { selectSection, selectedSectionId } = usePageBuilderStore();
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id: section.id,
-    data: { kind: "structure-item", sectionId: section.id },
-  });
-
-  return (
-    <button
-      ref={setNodeRef}
-      type="button"
-      onClick={() => selectSection(section.id)}
-      style={{
-        transform: CSS.Transform.toString(transform),
-        transition,
-      }}
-      className={`w-full rounded-lg border px-3 py-2 text-left text-xs transition ${
-        selectedSectionId === section.id
-          ? "border-primary bg-primary/5"
-          : "border-border bg-background"
-      } ${isDragging ? "opacity-50" : ""}`}
-      {...attributes}
-      {...listeners}
-    >
-      {sectionTypeLabel[section.type]} {section.visible ? "" : "(masquee)"}
-    </button>
-  );
-};
-
-const AddBetweenButton = ({ index }: { index: number }) => {
-  const { isEditMode, addSection } = usePageBuilderStore();
-  const [open, setOpen] = useState(false);
-
-  if (!isEditMode) {
-    return null;
-  }
-
-  return (
-    <div className="relative flex justify-center py-2">
-      <button
-        type="button"
-        onClick={() => setOpen((previous) => !previous)}
-        className="h-8 w-8 rounded-full bg-primary text-primary-foreground text-lg leading-none"
-      >
-        +
-      </button>
-      {open && (
-        <div className="absolute top-10 z-40 grid grid-cols-2 gap-2 rounded-xl border border-border bg-background p-2 shadow-xl">
-          {sectionTypes.map((type) => (
-            <button
-              key={`${type}-${index}`}
-              type="button"
-              onClick={() => {
-                addSection(type, index + 1);
-                setOpen(false);
-              }}
-              className="rounded-lg bg-accent px-2 py-1 text-[11px] hover:bg-accent/80"
-            >
-              {sectionTypeLabel[type]}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
-
-const SectionCanvas = ({ section }: { section: BuilderSection }) => {
-  const {
-    isEditMode,
-    selectSection,
-    selectedSectionId,
-    duplicateSection,
-    deleteSection,
-    setActiveTab,
-    updateBlockContent,
-    updateBlockImage,
-  } = usePageBuilderStore();
-  const [isHovered, setIsHovered] = useState(false);
-  const { setNodeRef } = useDroppable({
-    id: section.id,
-    data: { kind: "section-drop", sectionId: section.id },
-  });
-
-  if (!section.visible) {
-    return null;
-  }
-
-  return (
-    <section
-      ref={setNodeRef}
-      className={`relative rounded-xl transition ${
-        isEditMode && isHovered ? "border-2 border-blue-500" : "border-2 border-transparent"
-      }`}
-      style={{
-        backgroundColor: section.settings.background,
-        padding: `${section.settings.padding}px`,
-        color: section.settings.textColor,
-      }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      onClick={() => selectSection(section.id)}
-    >
-      {isEditMode && (
-        <>
-          <span className="absolute left-2 top-2 rounded bg-blue-600 px-2 py-1 text-[10px] font-semibold text-white">
-            {sectionTypeLabel[section.type]}
-          </span>
-          {(isHovered || selectedSectionId === section.id) && (
-            <div className="absolute right-2 top-2 z-20 flex items-center gap-1 rounded-lg border border-border bg-background p-1 shadow-md">
-              <button
-                type="button"
-                onClick={() => {
-                  selectSection(section.id);
-                  setActiveTab("settings");
-                }}
-                className="rounded px-2 py-1 text-[11px] hover:bg-accent"
-              >
-                Editer
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  selectSection(section.id);
-                  setActiveTab("settings");
-                }}
-                className="rounded px-2 py-1 text-[11px] hover:bg-accent"
-              >
-                Parametres
-              </button>
-              <button
-                type="button"
-                onClick={() => duplicateSection(section.id)}
-                className="rounded px-2 py-1 text-[11px] hover:bg-accent"
-              >
-                Dupliquer
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  if (window.confirm("Supprimer cette section ?")) {
-                    deleteSection(section.id);
-                  }
-                }}
-                className="rounded px-2 py-1 text-[11px] text-destructive hover:bg-destructive/10"
-              >
-                Supprimer
-              </button>
-            </div>
-          )}
-        </>
-      )}
-
-      <div className="space-y-4">
-        {section.blocks.map((block) => {
-          if (block.type === "heading" || block.type === "paragraph") {
-            return (
-              <InlineRichText
-                key={block.id}
-                html={block.content || "<p>Texte</p>"}
-                editable={isEditMode}
-                className={block.type === "heading" ? "text-3xl font-bold" : "text-base"}
-                onChange={(nextValue) => updateBlockContent(section.id, block.id, nextValue)}
-              />
-            );
-          }
-
-          if (block.type === "button") {
-            return (
-              <button
-                key={block.id}
-                type="button"
-                className="rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground"
-              >
-                {block.content || "Button"}
-              </button>
-            );
-          }
-
-          if (block.type === "image") {
-            return (
-              <div key={block.id} className="space-y-2">
-                <img
-                  src={block.src || "/placeholder.svg"}
-                  alt={block.alt || "Image section"}
-                  className="w-full rounded-xl object-cover"
-                />
-                {isEditMode && (
-                  <label className="inline-flex cursor-pointer items-center rounded-lg bg-secondary px-3 py-1.5 text-xs font-medium">
-                    Upload image
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(event) => {
-                        const file = event.target.files?.[0];
-                        if (!file) {
-                          return;
-                        }
-                        const reader = new FileReader();
-                        reader.onload = () => {
-                          const result = reader.result;
-                          if (typeof result === "string") {
-                            updateBlockImage(section.id, block.id, result, file.name);
-                          }
-                        };
-                        reader.readAsDataURL(file);
-                      }}
-                    />
-                  </label>
-                )}
-              </div>
-            );
-          }
-
-          if (block.type === "list") {
-            return (
-              <ul key={block.id} className="list-disc space-y-2 pl-6">
-                {(block.items || []).map((item, index) => (
-                  <li key={`${block.id}-${index}`}>{item}</li>
-                ))}
-              </ul>
-            );
-          }
-
-          return null;
-        })}
-      </div>
-    </section>
-  );
-};
-
-const exportToHtml = (sections: BuilderSection[]) => {
-  const visibleSections = sections.filter((section) => section.visible);
-  const htmlSections = visibleSections
-    .map((section) => {
-      const blocks = section.blocks
-        .map((block) => {
-          if (block.type === "heading" || block.type === "paragraph") {
-            return block.content || "";
-          }
-          if (block.type === "button") {
-            return `<a href="${block.href || "#"}" style="display:inline-block;padding:10px 20px;background:#0f172a;color:white;border-radius:999px;text-decoration:none;">${block.content || "Bouton"}</a>`;
-          }
-          if (block.type === "image") {
-            return `<img src="${block.src || ""}" alt="${block.alt || ""}" style="width:100%;border-radius:16px;" />`;
-          }
-          if (block.type === "list") {
-            const items = (block.items || []).map((item) => `<li>${item}</li>`).join("");
-            return `<ul>${items}</ul>`;
-          }
-          return "";
-        })
-        .join("\n");
-
-      return `<section style="background:${section.settings.background};padding:${section.settings.padding}px;color:${section.settings.textColor};">${blocks}</section>`;
-    })
-    .join("\n");
-
-  return `<!doctype html><html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Export AKConseil</title></head><body style="margin:0;font-family:Inter,Arial,sans-serif;">${htmlSections}</body></html>`;
-};
-
-const SidebarTabs = ({
-  activeTab,
-  onChange,
-}: {
-  activeTab: BuilderSidebarTab;
-  onChange: (tab: BuilderSidebarTab) => void;
-}) => (
-  <div className="grid grid-cols-3 gap-2">
-    {[
-      { key: "add", label: "Ajouter" },
-      { key: "structure", label: "Structure" },
-      { key: "settings", label: "Parametres" },
-    ].map((tab) => (
-      <button
-        key={tab.key}
-        type="button"
-        onClick={() => onChange(tab.key as BuilderSidebarTab)}
-        className={`rounded-lg px-3 py-2 text-xs font-semibold ${
-          activeTab === tab.key
-            ? "bg-primary text-primary-foreground"
-            : "bg-secondary text-secondary-foreground"
-        }`}
-      >
-        {tab.label}
-      </button>
-    ))}
-  </div>
-);
-
-const CanvasEndDrop = () => {
-  const { setNodeRef, isOver } = useDroppable({ id: "canvas-end" });
-  return (
-    <div
-      className={`rounded-xl border border-dashed p-6 text-center text-xs ${
-        isOver ? "border-primary bg-primary/5" : "border-border text-muted-foreground"
-      }`}
-      ref={setNodeRef}
-    >
-      Glissez ici pour ajouter une section
-    </div>
-  );
+  error: "Erreur de sauvegarde",
 };
 
 const PageBuilder = () => {
-  const {
-    sections,
-    selectedSectionId,
-    isEditMode,
-    activeTab,
-    viewport,
-    saveStatus,
-    history,
-    setEditMode,
-    setActiveTab,
-    setViewport,
-    setSaveStatus,
-    loadSections,
-    selectSection,
-    addSection,
-    moveSection,
-    updateSectionSettings,
-    toggleSectionVisibility,
-    undo,
-    redo,
-  } = usePageBuilderStore();
-
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
-  const [isLoaded, setIsLoaded] = useState(false);
-  const selectedSection = useMemo(
-    () => sections.find((section) => section.id === selectedSectionId) || null,
-    [sections, selectedSectionId],
-  );
+  const { content, setContentLocally, refresh } = useCmsContent();
+  const { toast } = useToast();
+  const [draft, setDraft] = useState<CmsContent>(content);
+  const [saveState, setSaveState] = useState<SaveState>("idle");
+  const [selectedPostIndex, setSelectedPostIndex] = useState(0);
 
   useEffect(() => {
-    const bootstrap = async () => {
-      try {
-        const response = await fetch("/api/page-builder", { cache: "no-store" });
-        if (!response.ok) {
-          setIsLoaded(true);
-          return;
-        }
-        const payload = (await response.json()) as { sections?: BuilderSection[] };
-        if (Array.isArray(payload.sections) && payload.sections.length > 0) {
-          loadSections(payload.sections);
-        }
-      } finally {
-        setIsLoaded(true);
-      }
-    };
-    void bootstrap();
-  }, [loadSections]);
+    setDraft(content);
+  }, [content]);
 
-  useEffect(() => {
-    if (!isLoaded) {
-      return;
-    }
-    setSaveStatus("saving");
-    const timeout = window.setTimeout(async () => {
-      try {
-        const response = await fetch("/api/page-builder", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ sections }),
-        });
-        if (!response.ok) {
-          throw new Error("Echec de sauvegarde.");
-        }
-        setSaveStatus("saved");
-      } catch {
-        setSaveStatus("error");
-      }
-    }, 2000);
+  const selectedPost = draft.blog.posts[selectedPostIndex] || null;
 
-    return () => {
-      window.clearTimeout(timeout);
-    };
-  }, [sections, isLoaded, setSaveStatus]);
+  const updateDraft = (updater: (previous: CmsContent) => CmsContent) => {
+    setDraft((previous) => {
+      const next = updater(previous);
+      setContentLocally(next);
+      return next;
+    });
+    setSaveState("idle");
+  };
 
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      const modifier = event.ctrlKey || event.metaKey;
-      if (!modifier) {
-        return;
-      }
-      if (event.key.toLowerCase() === "z" && !event.shiftKey) {
-        event.preventDefault();
-        undo();
-      }
-      if (
-        event.key.toLowerCase() === "y" ||
-        (event.key.toLowerCase() === "z" && event.shiftKey)
-      ) {
-        event.preventDefault();
-        redo();
-      }
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [undo, redo]);
+  const saveNow = async () => {
+    try {
+      setSaveState("saving");
+      const response = await fetch("/api/cms-content", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ content: draft }),
+      });
 
-  const handleDragEnd = (event: DragEndEvent) => {
-    const activeData = event.active.data.current as
-      | { kind?: "template"; type?: BuilderSectionType }
-      | { kind?: "structure-item"; sectionId?: string }
-      | undefined;
-
-    if (!event.over || !activeData) {
-      return;
-    }
-
-    if (activeData.kind === "template" && activeData.type) {
-      if (event.over.id === "canvas-end") {
-        addSection(activeData.type, sections.length);
-        return;
+      const payload = (await response.json().catch(() => ({}))) as { error?: string };
+      if (!response.ok) {
+        throw new Error(payload.error || `Erreur API (${response.status})`);
       }
-      const overIndex = sections.findIndex((section) => section.id === String(event.over?.id));
-      if (overIndex === -1) {
-        addSection(activeData.type, sections.length);
-      } else {
-        addSection(activeData.type, overIndex);
-      }
-      return;
-    }
 
-    if (activeData.kind === "structure-item") {
-      moveSection(String(event.active.id), String(event.over.id));
+      await refresh();
+      setSaveState("saved");
+      toast({
+        title: "Modifications enregistrees",
+        description: "Le contenu a bien ete publie.",
+      });
+    } catch (error) {
+      setSaveState("error");
+      toast({
+        title: "Publication impossible",
+        description: error instanceof Error ? error.message : "Erreur inconnue.",
+      });
     }
   };
 
+  useEffect(() => {
+    if (saveState === "saving" || saveState === "saved") {
+      return;
+    }
+    const timeout = window.setTimeout(() => {
+      void saveNow();
+    }, 2000);
+    return () => {
+      window.clearTimeout(timeout);
+    };
+  }, [draft]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const serviceImageRows = useMemo(
+    () => [
+      {
+        label: "Accompagnement educatif",
+        homeIndex: 0,
+        servicesIndex: 0,
+        fallback: imageMap.illusEducation,
+      },
+      {
+        label: "Insertion & orientation",
+        homeIndex: 1,
+        servicesIndex: 1,
+        fallback: imageMap.illusInsertion,
+      },
+    ],
+    [],
+  );
+
   return (
     <Layout>
-      <div className="fixed right-4 top-20 z-[90] flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-2 shadow-lg">
-        <span className="text-xs font-semibold">Mode edition</span>
-        <button
-          type="button"
-          onClick={() => setEditMode(!isEditMode)}
-          className={`h-7 w-14 rounded-full px-1 transition ${
-            isEditMode ? "bg-primary" : "bg-secondary"
-          }`}
-        >
-          <span
-            className={`block h-5 w-5 rounded-full bg-white transition ${
-              isEditMode ? "translate-x-7" : "translate-x-0"
-            }`}
-          />
-        </button>
-      </div>
-
-      <section className="py-12">
-        <div className="container">
-          <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-border bg-card px-4 py-3">
-            <div className="flex items-center gap-2">
-              <h1 className="font-display text-2xl font-bold">Page Builder visuel</h1>
-              <span className="rounded-full bg-accent px-3 py-1 text-xs">
-                {saveStatusLabel[saveStatus]}
-              </span>
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              {(["desktop", "tablet", "mobile"] as BuilderViewport[]).map((mode) => (
+      <section className="py-12 md:py-16">
+        <div className="container max-w-6xl space-y-6">
+          <div className="rounded-2xl border border-border bg-card p-6">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h1 className="font-display text-3xl font-bold">Editeur contenu simplifie</h1>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Modifiez les images, temoignages et articles de blog sans page builder complexe.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="rounded-full bg-accent px-3 py-1 text-xs">
+                  {saveStatusLabel[saveState]}
+                </span>
                 <button
-                  key={mode}
                   type="button"
-                  onClick={() => setViewport(mode)}
-                  className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                    viewport === mode
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-secondary text-secondary-foreground"
-                  }`}
+                  onClick={() => void saveNow()}
+                  className="px-4 py-2 rounded-full bg-primary text-primary-foreground text-xs font-semibold hover:bg-navy-light transition-colors"
                 >
-                  {mode}
+                  Publier maintenant
                 </button>
-              ))}
-              <button
-                type="button"
-                onClick={undo}
-                className="rounded-full bg-secondary px-3 py-1 text-xs font-semibold"
-              >
-                Undo (Ctrl+Z)
-              </button>
-              <button
-                type="button"
-                onClick={redo}
-                className="rounded-full bg-secondary px-3 py-1 text-xs font-semibold"
-              >
-                Redo (Ctrl+Y)
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  const html = exportToHtml(sections);
-                  const blob = new Blob([html], { type: "text/html;charset=utf-8" });
-                  const url = URL.createObjectURL(blob);
-                  const link = document.createElement("a");
-                  link.href = url;
-                  link.download = "akconseil-export.html";
-                  link.click();
-                  URL.revokeObjectURL(url);
-                }}
-                className="rounded-full bg-secondary px-3 py-1 text-xs font-semibold"
-              >
-                Export HTML
-              </button>
-              <span className="text-xs text-muted-foreground">
-                Historique: {history.past.length}
-              </span>
+              </div>
             </div>
           </div>
 
-          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-            <div className="grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
-              <aside className="rounded-2xl border border-border bg-card p-4">
-                <SidebarTabs activeTab={activeTab} onChange={setActiveTab} />
+          <div className="rounded-2xl border border-border bg-card p-6 space-y-5">
+            <h2 className="font-display text-2xl font-semibold">1) Images des services</h2>
+            <div className="grid md:grid-cols-2 gap-6">
+              {serviceImageRows.map((row) => {
+                const imageKey = draft.home.services[row.homeIndex]?.imageKey || "";
+                const preview = resolveImageSrc(imageKey, row.fallback);
+                return (
+                  <div key={row.label} className="rounded-xl border border-border p-4 space-y-3">
+                    <h3 className="font-semibold">{row.label}</h3>
+                    <img
+                      src={preview}
+                      alt={row.label}
+                      className="w-full h-48 object-cover rounded-lg"
+                    />
+                    <input
+                      value={imageKey}
+                      onChange={(event) => {
+                        const nextValue = event.target.value;
+                        updateDraft((previous) => {
+                          const next = cloneContent(previous);
+                          next.home.services[row.homeIndex].imageKey = nextValue;
+                          next.servicesPage.items[row.servicesIndex].imageKey = nextValue;
+                          return next;
+                        });
+                      }}
+                      className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm"
+                      placeholder="URL image"
+                    />
+                    <label className="inline-flex items-center px-3 py-2 rounded-lg bg-secondary text-secondary-foreground text-xs font-semibold cursor-pointer">
+                      Upload image
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(event) => {
+                          const file = event.target.files?.[0];
+                          if (!file) {
+                            return;
+                          }
+                          const reader = new FileReader();
+                          reader.onload = () => {
+                            const result = reader.result;
+                            if (typeof result !== "string") {
+                              return;
+                            }
+                            updateDraft((previous) => {
+                              const next = cloneContent(previous);
+                              next.home.services[row.homeIndex].imageKey = result;
+                              next.servicesPage.items[row.servicesIndex].imageKey = result;
+                              return next;
+                            });
+                          };
+                          reader.readAsDataURL(file);
+                        }}
+                      />
+                    </label>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
 
-                <div className="mt-4 space-y-3">
-                  {activeTab === "add" && (
-                    <>
-                      {sectionTypes.map((type) => (
-                        <AddSectionCard key={type} type={type} />
-                      ))}
-                      <p className="text-xs text-muted-foreground">
-                        Astuce : glissez une section sur la zone de preview.
-                      </p>
-                    </>
-                  )}
-
-                  {activeTab === "structure" && (
-                    <SortableContext
-                      items={sections.map((section) => section.id)}
-                      strategy={verticalListSortingStrategy}
+          <div className="rounded-2xl border border-border bg-card p-6 space-y-4">
+            <h2 className="font-display text-2xl font-semibold">2) Temoignages (dont etoiles)</h2>
+            <div className="space-y-4">
+              {draft.home.testimonials.map((testimonial, index) => (
+                <div key={`${testimonial.name}-${index}`} className="rounded-xl border border-border p-4 space-y-3">
+                  <div className="grid md:grid-cols-3 gap-3">
+                    <input
+                      value={testimonial.name}
+                      onChange={(event) =>
+                        updateDraft((previous) => {
+                          const next = cloneContent(previous);
+                          next.home.testimonials[index].name = event.target.value;
+                          return next;
+                        })
+                      }
+                      className="px-3 py-2 rounded-lg border border-border bg-background text-sm"
+                      placeholder="Nom"
+                    />
+                    <input
+                      value={testimonial.sessions}
+                      onChange={(event) =>
+                        updateDraft((previous) => {
+                          const next = cloneContent(previous);
+                          next.home.testimonials[index].sessions = event.target.value;
+                          return next;
+                        })
+                      }
+                      className="px-3 py-2 rounded-lg border border-border bg-background text-sm"
+                      placeholder="Sessions"
+                    />
+                    <select
+                      value={testimonial.stars ?? 5}
+                      onChange={(event) =>
+                        updateDraft((previous) => {
+                          const next = cloneContent(previous);
+                          next.home.testimonials[index].stars = Number(event.target.value);
+                          return next;
+                        })
+                      }
+                      className="px-3 py-2 rounded-lg border border-border bg-background text-sm"
                     >
-                      <div className="space-y-2">
-                        {sections.map((section) => (
-                          <StructureItem key={section.id} section={section} />
-                        ))}
-                      </div>
-                    </SortableContext>
-                  )}
-
-                  {activeTab === "settings" && selectedSection && (
-                    <div className="space-y-4 rounded-xl border border-border bg-background p-3">
-                      <h3 className="text-sm font-semibold">
-                        Parametres - {sectionTypeLabel[selectedSection.type]}
-                      </h3>
-
-                      <label className="flex items-center justify-between text-xs">
-                        Section visible
-                        <input
-                          type="checkbox"
-                          checked={selectedSection.visible}
-                          onChange={() => toggleSectionVisibility(selectedSection.id)}
-                        />
-                      </label>
-
-                      <label className="block text-xs">
-                        Couleur de fond
-                        <input
-                          type="color"
-                          value={selectedSection.settings.background}
-                          onChange={(event) =>
-                            updateSectionSettings(selectedSection.id, {
-                              background: event.target.value,
-                            })
-                          }
-                          className="mt-1 h-9 w-full rounded border border-border"
-                        />
-                      </label>
-
-                      <label className="block text-xs">
-                        Couleur du texte
-                        <input
-                          type="color"
-                          value={selectedSection.settings.textColor}
-                          onChange={(event) =>
-                            updateSectionSettings(selectedSection.id, {
-                              textColor: event.target.value,
-                            })
-                          }
-                          className="mt-1 h-9 w-full rounded border border-border"
-                        />
-                      </label>
-
-                      <label className="block text-xs">
-                        Padding ({selectedSection.settings.padding}px)
-                        <input
-                          type="range"
-                          min={24}
-                          max={140}
-                          step={4}
-                          value={selectedSection.settings.padding}
-                          onChange={(event) =>
-                            updateSectionSettings(selectedSection.id, {
-                              padding: Number(event.target.value),
-                            })
-                          }
-                          className="mt-2 w-full"
-                        />
-                      </label>
-                    </div>
-                  )}
+                      {[1, 2, 3, 4, 5].map((value) => (
+                        <option key={value} value={value}>
+                          {value} etoile{value > 1 ? "s" : ""}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <textarea
+                    value={testimonial.text}
+                    onChange={(event) =>
+                      updateDraft((previous) => {
+                        const next = cloneContent(previous);
+                        next.home.testimonials[index].text = event.target.value;
+                        return next;
+                      })
+                    }
+                    rows={3}
+                    className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm"
+                    placeholder="Texte du temoignage"
+                  />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      updateDraft((previous) => {
+                        const next = cloneContent(previous);
+                        next.home.testimonials.splice(index, 1);
+                        return next;
+                      })
+                    }
+                    className="px-3 py-1.5 rounded-full bg-destructive text-destructive-foreground text-xs font-semibold"
+                  >
+                    Supprimer ce temoignage
+                  </button>
                 </div>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={() =>
+                updateDraft((previous) => {
+                  const next = cloneContent(previous);
+                  next.home.testimonials.push({
+                    text: "Nouveau temoignage",
+                    name: "Nom",
+                    sessions: "1 session",
+                    stars: 5,
+                  });
+                  return next;
+                })
+              }
+              className="px-4 py-2 rounded-full bg-primary text-primary-foreground text-xs font-semibold"
+            >
+              Ajouter un temoignage
+            </button>
+          </div>
+
+          <div className="rounded-2xl border border-border bg-card p-6 space-y-4">
+            <h2 className="font-display text-2xl font-semibold">3) Redaction articles de blog</h2>
+            <div className="grid lg:grid-cols-[280px_minmax(0,1fr)] gap-5">
+              <aside className="space-y-2">
+                {draft.blog.posts.map((post, index) => (
+                  <button
+                    key={post.slug}
+                    type="button"
+                    onClick={() => setSelectedPostIndex(index)}
+                    className={`w-full text-left px-3 py-2 rounded-lg border text-sm ${
+                      index === selectedPostIndex
+                        ? "border-primary bg-primary/5"
+                        : "border-border bg-background"
+                    }`}
+                  >
+                    {post.title}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={() =>
+                    updateDraft((previous) => {
+                      const next = cloneContent(previous);
+                      next.blog.posts.unshift(createEmptyPost());
+                      setSelectedPostIndex(0);
+                      return next;
+                    })
+                  }
+                  className="w-full px-3 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-semibold"
+                >
+                  + Nouvel article
+                </button>
               </aside>
 
-              <main className="rounded-2xl border border-border bg-card p-4">
-                <div
-                  className={`mx-auto w-full ${viewportClass[viewport]} min-h-[300px] space-y-4 transition-all`}
-                >
-                  {sections.map((section, index) => (
-                    <div key={section.id} className="space-y-2">
-                      <SectionCanvas section={section} />
-                      <AddBetweenButton index={index} />
-                    </div>
-                  ))}
-                  <CanvasEndDrop />
+              {selectedPost && (
+                <div className="space-y-4">
+                  <div className="grid md:grid-cols-2 gap-3">
+                    <input
+                      value={selectedPost.title}
+                      onChange={(event) =>
+                        updateDraft((previous) => {
+                          const next = cloneContent(previous);
+                          next.blog.posts[selectedPostIndex].title = event.target.value;
+                          return next;
+                        })
+                      }
+                      className="px-3 py-2 rounded-lg border border-border bg-background text-sm"
+                      placeholder="Titre"
+                    />
+                    <input
+                      value={selectedPost.slug}
+                      onChange={(event) =>
+                        updateDraft((previous) => {
+                          const next = cloneContent(previous);
+                          next.blog.posts[selectedPostIndex].slug = createSlug(event.target.value);
+                          return next;
+                        })
+                      }
+                      className="px-3 py-2 rounded-lg border border-border bg-background text-sm"
+                      placeholder="slug"
+                    />
+                    <select
+                      value={selectedPost.category}
+                      onChange={(event) =>
+                        updateDraft((previous) => {
+                          const next = cloneContent(previous);
+                          next.blog.posts[selectedPostIndex].category = event.target.value as CmsBlogPost["category"];
+                          return next;
+                        })
+                      }
+                      className="px-3 py-2 rounded-lg border border-border bg-background text-sm"
+                    >
+                      <option value="Educatif">Educatif</option>
+                      <option value="Insertion">Insertion</option>
+                      <option value="Professionnel">Professionnel</option>
+                    </select>
+                    <input
+                      value={selectedPost.readingTime}
+                      onChange={(event) =>
+                        updateDraft((previous) => {
+                          const next = cloneContent(previous);
+                          next.blog.posts[selectedPostIndex].readingTime = event.target.value;
+                          return next;
+                        })
+                      }
+                      className="px-3 py-2 rounded-lg border border-border bg-background text-sm"
+                      placeholder="Temps de lecture"
+                    />
+                  </div>
+
+                  <input
+                    value={selectedPost.imageKey}
+                    onChange={(event) =>
+                      updateDraft((previous) => {
+                        const next = cloneContent(previous);
+                        next.blog.posts[selectedPostIndex].imageKey = event.target.value;
+                        return next;
+                      })
+                    }
+                    className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm"
+                    placeholder="URL image de couverture"
+                  />
+
+                  <textarea
+                    value={selectedPost.excerpt}
+                    onChange={(event) =>
+                      updateDraft((previous) => {
+                        const next = cloneContent(previous);
+                        next.blog.posts[selectedPostIndex].excerpt = event.target.value;
+                        return next;
+                      })
+                    }
+                    rows={2}
+                    className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm"
+                    placeholder="Resume"
+                  />
+
+                  <textarea
+                    value={selectedPost.metaDescription}
+                    onChange={(event) =>
+                      updateDraft((previous) => {
+                        const next = cloneContent(previous);
+                        next.blog.posts[selectedPostIndex].metaDescription = event.target.value;
+                        return next;
+                      })
+                    }
+                    rows={2}
+                    className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm"
+                    placeholder="Meta description SEO"
+                  />
+
+                  <div className="space-y-3">
+                    {selectedPost.sections.map((section, sectionIndex) => (
+                      <div key={`${selectedPost.slug}-section-${sectionIndex}`} className="rounded-xl border border-border p-3 space-y-2">
+                        <input
+                          value={section.heading}
+                          onChange={(event) =>
+                            updateDraft((previous) => {
+                              const next = cloneContent(previous);
+                              next.blog.posts[selectedPostIndex].sections[sectionIndex].heading = event.target.value;
+                              return next;
+                            })
+                          }
+                          className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm"
+                          placeholder="Titre de section"
+                        />
+                        <textarea
+                          value={section.paragraphs.join("\n\n")}
+                          onChange={(event) =>
+                            updateDraft((previous) => {
+                              const next = cloneContent(previous);
+                              next.blog.posts[selectedPostIndex].sections[sectionIndex].paragraphs =
+                                event.target.value
+                                  .split(/\n{2,}/)
+                                  .map((item) => item.trim())
+                                  .filter(Boolean);
+                              return next;
+                            })
+                          }
+                          rows={5}
+                          className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm"
+                          placeholder="Corps du texte (separez les paragraphes par ligne vide)"
+                        />
+                        <textarea
+                          value={(section.bullets || []).join("\n")}
+                          onChange={(event) =>
+                            updateDraft((previous) => {
+                              const next = cloneContent(previous);
+                              next.blog.posts[selectedPostIndex].sections[sectionIndex].bullets =
+                                event.target.value
+                                  .split("\n")
+                                  .map((item) => item.trim())
+                                  .filter(Boolean);
+                              return next;
+                            })
+                          }
+                          rows={3}
+                          className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm"
+                          placeholder="Liste a puces (une ligne = une puce)"
+                        />
+                        <button
+                          type="button"
+                          onClick={() =>
+                            updateDraft((previous) => {
+                              const next = cloneContent(previous);
+                              next.blog.posts[selectedPostIndex].sections.splice(sectionIndex, 1);
+                              return next;
+                            })
+                          }
+                          className="px-3 py-1.5 rounded-full bg-destructive text-destructive-foreground text-xs"
+                        >
+                          Supprimer section
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        updateDraft((previous) => {
+                          const next = cloneContent(previous);
+                          next.blog.posts[selectedPostIndex].sections.push({
+                            heading: "Nouvelle section",
+                            paragraphs: ["Texte de section"],
+                            bullets: [],
+                          });
+                          return next;
+                        })
+                      }
+                      className="px-4 py-2 rounded-full bg-secondary text-secondary-foreground text-xs font-semibold"
+                    >
+                      Ajouter section
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        updateDraft((previous) => {
+                          const next = cloneContent(previous);
+                          next.blog.posts.splice(selectedPostIndex, 1);
+                          setSelectedPostIndex(0);
+                          return next;
+                        })
+                      }
+                      className="px-4 py-2 rounded-full bg-destructive text-destructive-foreground text-xs font-semibold"
+                    >
+                      Supprimer l'article
+                    </button>
+                  </div>
                 </div>
-              </main>
+              )}
             </div>
-          </DndContext>
+          </div>
         </div>
       </section>
     </Layout>

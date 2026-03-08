@@ -44,9 +44,15 @@ Routes :
 
 - `/admin-login`
 - `/admin-dashboard` (protege)
-- `/page-builder` (editeur visuel avance)
+- `/page-builder` (editeur contenu simplifie)
 
-Identifiants temporaires par defaut :
+Variables d'environnement requises pour l'acces admin :
 
-- Email : `admin@akconseil.fr`
-- Mot de passe : `AKC-Temp-2026!`
+- `ADMIN_LOGIN_EMAIL`
+- `ADMIN_LOGIN_PASSWORD`
+- `ADMIN_AUTH_SECRET`
+
+Le login admin envoie un lien de validation par email (Resend), donc ajouter aussi :
+
+- `RESEND_API_KEY`
+- `RESEND_FROM_EMAIL`

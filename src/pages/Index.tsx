@@ -234,11 +234,12 @@ const Index = () => {
                     text: "Nouveau temoignage",
                     name: "Nom",
                     sessions: "1 session",
+                    stars: 5,
                   })}
                 />
               </div>
               <div className="flex gap-1 mb-4">
-                {[...Array(5)].map((_, j) => (
+                {[...Array(Math.max(1, Math.min(5, testimonial.stars ?? 5)))].map((_, j) => (
                   <Star key={j} size={16} className="fill-gold text-gold" />
                 ))}
               </div>
@@ -272,6 +273,7 @@ const Index = () => {
               text: "Nouveau temoignage",
               name: "Nom",
               sessions: "1 session",
+              stars: 5,
             })}
           />
         </div>

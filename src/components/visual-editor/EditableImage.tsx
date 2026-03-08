@@ -86,6 +86,28 @@ const EditableImage = ({
             className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
             placeholder="/images/photo.jpg"
           />
+          <label className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-border bg-accent/40 text-xs cursor-pointer">
+            Upload image
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                if (!file) {
+                  return;
+                }
+                const reader = new FileReader();
+                reader.onload = () => {
+                  const result = reader.result;
+                  if (typeof result === "string") {
+                    setDraftSrc(result);
+                  }
+                };
+                reader.readAsDataURL(file);
+              }}
+            />
+          </label>
           <div className="flex items-center gap-2 justify-end">
             <button
               type="button"

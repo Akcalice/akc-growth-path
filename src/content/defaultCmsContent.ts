@@ -66,7 +66,7 @@ export type CmsContent = {
     whyCtaLabel: string;
     whyImageKey: string;
     testimonialsTitle: string;
-    testimonials: { text: string; name: string; sessions: string }[];
+    testimonials: { text: string; name: string; sessions: string; stars: number }[];
     faqTitle: string;
     faqDescription: string;
     faqItems: { q: string; a: string }[];
@@ -294,16 +294,19 @@ export const defaultCmsContent: CmsContent = {
         text: "AKConseil a su m'accompagner avec une grande justesse, a un moment ou j'avais besoin de recul et de clarte.",
         name: "Charline",
         sessions: "8 sessions",
+        stars: 5,
       },
       {
         text: "Grace a l'accompagnement personnalise, j'ai pu retrouver confiance en moi et construire un projet professionnel solide.",
         name: "Anna",
         sessions: "7 sessions",
+        stars: 5,
       },
       {
         text: "Un cadre bienveillant et sans jugement qui m'a permis d'avancer sereinement dans ma reconversion.",
         name: "Sophie",
         sessions: "12 sessions",
+        stars: 5,
       },
     ],
     faqTitle: "Foire Aux Questions",

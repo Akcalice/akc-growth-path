@@ -3,7 +3,7 @@ import { useAdminAuth } from "@/context/AdminAuthContext";
 import { Link } from "react-router-dom";
 
 const AdminDashboard = () => {
-  const { logout } = useAdminAuth();
+  const { logout, email } = useAdminAuth();
 
   return (
     <Layout>
@@ -18,6 +18,9 @@ const AdminDashboard = () => {
             </h1>
             <p className="text-muted-foreground">
               Acces principal pour gerer le site AKConseil.
+            </p>
+            <p className="text-xs text-muted-foreground mt-3">
+              Connecte en tant que : <strong>{email || "admin"}</strong>
             </p>
           </div>
 
@@ -38,7 +41,7 @@ const AdminDashboard = () => {
                   to="/page-builder"
                   className="inline-flex items-center px-5 py-2.5 rounded-full bg-secondary text-secondary-foreground text-sm font-semibold hover:bg-secondary/90 transition-colors"
                 >
-                  Ouvrir le page builder
+                  Ouvrir l'editeur contenu
                 </Link>
               </div>
             </div>
@@ -48,7 +51,7 @@ const AdminDashboard = () => {
               <div className="flex flex-wrap gap-2">
                 <button
                   type="button"
-                  onClick={logout}
+                  onClick={() => void logout()}
                   className="inline-flex items-center px-5 py-2.5 rounded-full bg-secondary text-secondary-foreground text-sm font-semibold hover:bg-secondary/90 transition-colors"
                 >
                   Deconnexion
