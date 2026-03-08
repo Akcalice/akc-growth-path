@@ -198,7 +198,7 @@ export const defaultCmsContent: CmsContent = {
       "AKConseil : accompagnement educatif, social et professionnel sur-mesure.",
     ogImage: "/logo-akc.svg",
     logoPath: "/logo-akc.svg",
-    faviconPath: "/favicon-akconseil.svg",
+    faviconPath: "/favicon.ico",
     calendlyUrl: "https://calendly.com/contact-akconseil/appel-d-offre",
     contactEmail: "contact@akconseil.fr",
     location: "France",

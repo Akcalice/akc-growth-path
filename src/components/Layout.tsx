@@ -62,7 +62,9 @@ const Layout = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
-    const faviconPath = content.site.faviconPath || "/favicon-akconseil.svg";
+    const faviconPath = content.site.faviconPath || "/favicon.ico";
+    const faviconVersion = "12";
+    const faviconUrl = `${faviconPath}${faviconPath.includes("?") ? "&" : "?"}v=${faviconVersion}`;
 
     let icon = document.querySelector('link[rel="icon"]') as HTMLLinkElement | null;
     if (!icon) {
@@ -70,8 +72,16 @@ const Layout = ({ children }: { children: ReactNode }) => {
       icon.rel = "icon";
       document.head.appendChild(icon);
     }
-    icon.setAttribute("type", "image/svg+xml");
-    icon.href = `${faviconPath}${faviconPath.includes("?") ? "&" : "?"}v=11`;
+    icon.setAttribute("type", faviconPath.endsWith(".svg") ? "image/svg+xml" : "image/x-icon");
+    icon.href = faviconUrl;
+
+    let shortcut = document.querySelector('link[rel="shortcut icon"]') as HTMLLinkElement | null;
+    if (!shortcut) {
+      shortcut = document.createElement("link");
+      shortcut.rel = "shortcut icon";
+      document.head.appendChild(shortcut);
+    }
+    shortcut.href = faviconUrl;
   }, [
     location.pathname,
     content.site.faviconPath,
