@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Mail, MapPin } from "lucide-react";
+import { Instagram, Linkedin, Mail, MapPin } from "lucide-react";
 import { useCmsContent } from "@/context/CmsContentContext";
 import EditableImage from "@/components/visual-editor/EditableImage";
 import EditableText from "@/components/visual-editor/EditableText";
@@ -9,6 +9,8 @@ const Footer = () => {
   const logoPath = "/logo-akc.svg";
   const logoSrc = `${logoPath}${logoPath.includes("?") ? "&" : "?"}v=11`;
   const calendlyUrl = content.site.calendlyUrl;
+  const instagramUrl = content.site.instagramUrl?.trim();
+  const linkedinUrl = content.site.linkedinUrl?.trim();
 
   return (
     <footer className="bg-primary text-primary-foreground">
@@ -71,6 +73,44 @@ const Footer = () => {
                 <MapPin size={16} />
                 <EditableText path="site.location" value={content.site.location} />
               </span>
+              <div className="flex items-center gap-3 pt-2">
+                {instagramUrl ? (
+                  <a
+                    href={instagramUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label="Instagram"
+                    className="inline-flex items-center justify-center w-9 h-9 rounded-full border border-primary-foreground/25 hover:border-primary-foreground/60 hover:text-primary-foreground transition-colors"
+                  >
+                    <Instagram size={16} />
+                  </a>
+                ) : (
+                  <span
+                    aria-label="Instagram non configure"
+                    className="inline-flex items-center justify-center w-9 h-9 rounded-full border border-primary-foreground/20 opacity-50"
+                  >
+                    <Instagram size={16} />
+                  </span>
+                )}
+                {linkedinUrl ? (
+                  <a
+                    href={linkedinUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label="LinkedIn"
+                    className="inline-flex items-center justify-center w-9 h-9 rounded-full border border-primary-foreground/25 hover:border-primary-foreground/60 hover:text-primary-foreground transition-colors"
+                  >
+                    <Linkedin size={16} />
+                  </a>
+                ) : (
+                  <span
+                    aria-label="LinkedIn non configure"
+                    className="inline-flex items-center justify-center w-9 h-9 rounded-full border border-primary-foreground/20 opacity-50"
+                  >
+                    <Linkedin size={16} />
+                  </span>
+                )}
+              </div>
             </div>
           </div>
           <div>

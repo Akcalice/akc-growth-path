@@ -33,6 +33,8 @@ export type CmsContent = {
     calendlyUrl: string;
     contactEmail: string;
     location: string;
+    instagramUrl: string;
+    linkedinUrl: string;
   };
   navbar: {
     links: { to: string; label: string }[];
@@ -204,6 +206,8 @@ export const defaultCmsContent: CmsContent = {
     calendlyUrl: "https://calendly.com/contact-akconseil/appel-d-offre",
     contactEmail: "contact@akconseil.fr",
     location: "France",
+    instagramUrl: "",
+    linkedinUrl: "",
   },
   navbar: {
     links: [
@@ -358,7 +362,7 @@ export const defaultCmsContent: CmsContent = {
     paragraph2:
       "Ma philosophie : Aller au rythme de la personne accompagnee. Chaque parcours est unique, et mon approche humaine et personnalisee permet a chacun de devenir acteur de son evolution. Je travaille aupres des femmes, des familles, des jeunes et des structures professionnelles pour offrir un accompagnement complet et bienveillant.",
     ctaLabel: "Prendre Rendez-vous",
-    portraitImageKey: "consultantPortrait",
+    portraitImageKey: "/logo-akc.svg",
     methodologyTitle: "Ma methodologie",
     methodologyParagraph1:
       "Mon approche repose sur l'ecoute active, l'analyse de la situation globale et la co-construction de solutions adaptees. Je combine formations, ateliers pratiques et conseils personnalises.",

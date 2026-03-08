@@ -11,7 +11,9 @@ const APropos = () => {
   const { content } = useCmsContent();
   const about = content.about;
   const calendlyUrl = content.site.calendlyUrl;
-  const portraitImage = resolveImageSrc(about.portraitImageKey, imageMap.consultantPortrait);
+  const normalizedPortraitKey =
+    about.portraitImageKey === "consultantPortrait" ? "/logo-akc.svg" : about.portraitImageKey;
+  const portraitImage = resolveImageSrc(normalizedPortraitKey, "/logo-akc.svg");
   const methodologyImage = resolveImageSrc(about.methodologyImageKey, imageMap.booksStudy);
 
   return (
@@ -41,12 +43,12 @@ const APropos = () => {
               <EditableText path="about.ctaLabel" value={about.ctaLabel} />
             </a>
           </div>
-          <div className="rounded-2xl overflow-hidden shadow-lg">
+          <div className="rounded-2xl overflow-hidden shadow-lg bg-primary/5 p-6 md:p-8">
             <EditableImage
               path="about.portraitImageKey"
               src={portraitImage}
               alt={`Portrait ${content.site.companyName}`}
-              imgClassName="w-full object-cover"
+              imgClassName="w-full h-auto object-contain"
             />
           </div>
         </div>
