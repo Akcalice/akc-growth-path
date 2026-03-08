@@ -50,13 +50,14 @@ const BlogArticle = () => {
   }
 
   const baseUrl =
-    typeof window !== "undefined" && window.location.origin
+    content.site.siteUrl ||
+    (typeof window !== "undefined" && window.location.origin
       ? window.location.origin
-      : "https://akc-growth-path.vercel.app";
+      : "https://akc-growth-path.vercel.app");
 
   const canonicalPath = `/blog/${article.slug}`;
   const imagePath = imageMap[article.imageKey as keyof typeof imageMap] ?? imageMap.illusEducation;
-  const imageUrl = `${baseUrl}${imagePath}`;
+  const imageUrl = new URL(imagePath, baseUrl).toString();
   const articleStructuredData = {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -74,10 +75,10 @@ const BlogArticle = () => {
       name: content.site.companyName,
       logo: {
         "@type": "ImageObject",
-        url: `${baseUrl}${content.site.logoPath}`,
+        url: new URL(content.site.logoPath, baseUrl).toString(),
       },
     },
-    mainEntityOfPage: `${baseUrl}${canonicalPath}`,
+    mainEntityOfPage: new URL(canonicalPath, baseUrl).toString(),
     keywords: article.keywords.join(", "),
   };
 
@@ -87,6 +88,7 @@ const BlogArticle = () => {
         title={article.metaTitle}
         description={article.metaDescription}
         canonicalPath={canonicalPath}
+        baseUrl={baseUrl}
         image={imagePath}
         type="article"
         keywords={article.keywords}

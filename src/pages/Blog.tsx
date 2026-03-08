@@ -17,16 +17,17 @@ const Blog = () => {
   const blog = content.blog;
   const posts = blog.posts;
   const baseUrl =
-    typeof window !== "undefined" && window.location.origin
+    content.site.siteUrl ||
+    (typeof window !== "undefined" && window.location.origin
       ? window.location.origin
-      : "https://akc-growth-path.vercel.app";
+      : "https://akc-growth-path.vercel.app");
 
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Blog",
     name: `Blog ${content.site.companyName}`,
     description: blog.seoDescription,
-    url: `${baseUrl}/blog`,
+    url: new URL("/blog", baseUrl).toString(),
     blogPost: posts.map((article) => {
       const articleImage =
         imageMap[article.imageKey as keyof typeof imageMap] ?? imageMap.illusEducation;
@@ -35,8 +36,8 @@ const Blog = () => {
         headline: article.title,
         datePublished: article.publishedAt,
         dateModified: article.updatedAt,
-        url: `${baseUrl}/blog/${article.slug}`,
-        image: `${baseUrl}${articleImage}`,
+        url: new URL(`/blog/${article.slug}`, baseUrl).toString(),
+        image: new URL(articleImage, baseUrl).toString(),
         keywords: article.keywords.join(", "),
         author: {
           "@type": "Organization",
@@ -52,6 +53,7 @@ const Blog = () => {
         title={blog.seoTitle}
         description={blog.seoDescription}
         canonicalPath="/blog"
+        baseUrl={baseUrl}
         image={content.site.logoPath}
         type="website"
         keywords={[

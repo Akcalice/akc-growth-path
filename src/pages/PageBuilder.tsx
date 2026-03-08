@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useEffect, useMemo, useState } from "react";
 
 type SaveState = "idle" | "saving" | "saved" | "error";
+const PAGE_BUILDER_PASSWORD_KEY = "akconseil_page_builder_password";
 
 const cloneContent = <T,>(value: T): T => {
   if (typeof structuredClone === "function") {
@@ -60,10 +61,18 @@ const PageBuilder = () => {
   const [draft, setDraft] = useState<CmsContent>(content);
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [selectedPostIndex, setSelectedPostIndex] = useState(0);
+  const [adminPassword, setAdminPassword] = useState("");
 
   useEffect(() => {
     setDraft(content);
   }, [content]);
+
+  useEffect(() => {
+    const savedPassword = window.localStorage.getItem(PAGE_BUILDER_PASSWORD_KEY);
+    if (savedPassword) {
+      setAdminPassword(savedPassword);
+    }
+  }, []);
 
   const selectedPost = draft.blog.posts[selectedPostIndex] || null;
 
@@ -76,34 +85,55 @@ const PageBuilder = () => {
     setSaveState("idle");
   };
 
-  const saveNow = async () => {
+  const saveNow = async (options?: { silent?: boolean }) => {
+    const silent = options?.silent ?? false;
+    if (!adminPassword.trim()) {
+      setSaveState("error");
+      if (!silent) {
+        toast({
+          title: "Mot de passe requis",
+          description: "Renseignez le mot de passe admin pour publier les modifications.",
+        });
+      }
+      return;
+    }
+
     try {
       setSaveState("saving");
       const response = await fetch("/api/cms-content", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
+          "x-admin-password": adminPassword.trim(),
         },
         body: JSON.stringify({ content: draft }),
       });
 
-      const payload = (await response.json().catch(() => ({}))) as { error?: string };
+      const payload = (await response.json().catch(() => ({}))) as {
+        error?: string;
+        details?: string;
+      };
       if (!response.ok) {
-        throw new Error(payload.error || `Erreur API (${response.status})`);
+        const details = payload.details ? ` ${payload.details}` : "";
+        throw new Error((payload.error || `Erreur API (${response.status})`) + details);
       }
 
       await refresh();
       setSaveState("saved");
-      toast({
-        title: "Modifications enregistrees",
-        description: "Le contenu a bien ete publie.",
-      });
+      if (!silent) {
+        toast({
+          title: "Modifications enregistrees",
+          description: "Le contenu a bien ete publie.",
+        });
+      }
     } catch (error) {
       setSaveState("error");
-      toast({
-        title: "Publication impossible",
-        description: error instanceof Error ? error.message : "Erreur inconnue.",
-      });
+      if (!silent) {
+        toast({
+          title: "Publication impossible",
+          description: error instanceof Error ? error.message : "Erreur inconnue.",
+        });
+      }
     }
   };
 
@@ -111,13 +141,16 @@ const PageBuilder = () => {
     if (saveState === "saving" || saveState === "saved") {
       return;
     }
+    if (!adminPassword.trim()) {
+      return;
+    }
     const timeout = window.setTimeout(() => {
-      void saveNow();
+      void saveNow({ silent: true });
     }, 2000);
     return () => {
       window.clearTimeout(timeout);
     };
-  }, [draft]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [draft, adminPassword]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const serviceImageRows = useMemo(
     () => [
@@ -136,6 +169,9 @@ const PageBuilder = () => {
     ],
     [],
   );
+  const siteBaseUrl = (draft.site.siteUrl || "https://akconseil.fr").replace(/\/+$/, "");
+  const homeSnippetTitle = draft.site.tabTitle || draft.site.companyName;
+  const blogSnippetTitle = draft.blog.seoTitle || `Blog | ${draft.site.companyName}`;
 
   return (
     <Layout>
@@ -149,7 +185,18 @@ const PageBuilder = () => {
                   Modifiez les images, temoignages et articles de blog sans page builder complexe.
                 </p>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <input
+                  type="password"
+                  value={adminPassword}
+                  onChange={(event) => {
+                    const value = event.target.value;
+                    setAdminPassword(value);
+                    window.localStorage.setItem(PAGE_BUILDER_PASSWORD_KEY, value);
+                  }}
+                  placeholder="Mot de passe admin (publication)"
+                  className="px-3 py-2 rounded-lg border border-border bg-background text-xs md:text-sm min-w-[240px]"
+                />
                 <span className="rounded-full bg-accent px-3 py-1 text-xs">
                   {saveStatusLabel[saveState]}
                 </span>
@@ -411,6 +458,18 @@ const PageBuilder = () => {
                       className="px-3 py-2 rounded-lg border border-border bg-background text-sm"
                       placeholder="Temps de lecture"
                     />
+                    <input
+                      value={selectedPost.metaTitle}
+                      onChange={(event) =>
+                        updateDraft((previous) => {
+                          const next = cloneContent(previous);
+                          next.blog.posts[selectedPostIndex].metaTitle = event.target.value;
+                          return next;
+                        })
+                      }
+                      className="px-3 py-2 rounded-lg border border-border bg-background text-sm md:col-span-2"
+                      placeholder="Meta title SEO (titre Google)"
+                    />
                   </div>
 
                   <input
@@ -452,6 +511,22 @@ const PageBuilder = () => {
                     rows={2}
                     className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm"
                     placeholder="Meta description SEO"
+                  />
+
+                  <input
+                    value={selectedPost.keywords.join(", ")}
+                    onChange={(event) =>
+                      updateDraft((previous) => {
+                        const next = cloneContent(previous);
+                        next.blog.posts[selectedPostIndex].keywords = event.target.value
+                          .split(",")
+                          .map((item) => item.trim())
+                          .filter(Boolean);
+                        return next;
+                      })
+                    }
+                    className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm"
+                    placeholder="Mots-cles SEO (separes par des virgules)"
                   />
 
                   <div className="space-y-3">
@@ -555,6 +630,151 @@ const PageBuilder = () => {
                   </div>
                 </div>
               )}
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-border bg-card p-6 space-y-5">
+            <h2 className="font-display text-2xl font-semibold">
+              4) SEO Google (titre, description, URL)
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Ces champs influencent l'affichage de votre site sur Google (titre, description,
+              URL canonique et partage social).
+            </p>
+
+            <div className="grid md:grid-cols-2 gap-4">
+              <label className="space-y-1">
+                <span className="text-xs font-semibold">Nom entreprise</span>
+                <input
+                  value={draft.site.companyName}
+                  onChange={(event) =>
+                    updateDraft((previous) => {
+                      const next = cloneContent(previous);
+                      next.site.companyName = event.target.value;
+                      return next;
+                    })
+                  }
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm"
+                  placeholder="AKConseil"
+                />
+              </label>
+
+              <label className="space-y-1">
+                <span className="text-xs font-semibold">URL officielle du site</span>
+                <input
+                  value={draft.site.siteUrl}
+                  onChange={(event) =>
+                    updateDraft((previous) => {
+                      const next = cloneContent(previous);
+                      next.site.siteUrl = event.target.value.trim();
+                      return next;
+                    })
+                  }
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm"
+                  placeholder="https://akconseil.fr"
+                />
+              </label>
+
+              <label className="space-y-1 md:col-span-2">
+                <span className="text-xs font-semibold">Titre SEO page d'accueil</span>
+                <input
+                  value={draft.site.tabTitle}
+                  onChange={(event) =>
+                    updateDraft((previous) => {
+                      const next = cloneContent(previous);
+                      next.site.tabTitle = event.target.value;
+                      return next;
+                    })
+                  }
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm"
+                  placeholder="AKConseil | Accompagnement educatif, social et professionnel"
+                />
+              </label>
+
+              <label className="space-y-1 md:col-span-2">
+                <span className="text-xs font-semibold">Description SEO page d'accueil</span>
+                <textarea
+                  value={draft.site.defaultMetaDescription}
+                  onChange={(event) =>
+                    updateDraft((previous) => {
+                      const next = cloneContent(previous);
+                      next.site.defaultMetaDescription = event.target.value;
+                      return next;
+                    })
+                  }
+                  rows={3}
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm"
+                  placeholder="Description affichee sur Google"
+                />
+              </label>
+
+              <label className="space-y-1">
+                <span className="text-xs font-semibold">Titre SEO page Blog</span>
+                <input
+                  value={draft.blog.seoTitle}
+                  onChange={(event) =>
+                    updateDraft((previous) => {
+                      const next = cloneContent(previous);
+                      next.blog.seoTitle = event.target.value;
+                      return next;
+                    })
+                  }
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm"
+                  placeholder="Blog AKConseil | Conseils et accompagnement"
+                />
+              </label>
+
+              <label className="space-y-1">
+                <span className="text-xs font-semibold">Description SEO page Blog</span>
+                <textarea
+                  value={draft.blog.seoDescription}
+                  onChange={(event) =>
+                    updateDraft((previous) => {
+                      const next = cloneContent(previous);
+                      next.blog.seoDescription = event.target.value;
+                      return next;
+                    })
+                  }
+                  rows={3}
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm"
+                  placeholder="Description Google pour la page blog"
+                />
+              </label>
+
+              <label className="space-y-1 md:col-span-2">
+                <span className="text-xs font-semibold">Image de partage (Open Graph)</span>
+                <input
+                  value={draft.site.ogImage}
+                  onChange={(event) =>
+                    updateDraft((previous) => {
+                      const next = cloneContent(previous);
+                      next.site.ogImage = event.target.value;
+                      return next;
+                    })
+                  }
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm"
+                  placeholder="/logo-akc.svg"
+                />
+              </label>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="rounded-xl border border-border p-4">
+                <p className="text-xs font-semibold mb-3">Apercu Google - Accueil</p>
+                <p className="text-sm text-blue-700 truncate">{siteBaseUrl}/</p>
+                <p className="text-lg text-[#1a0dab] leading-snug">{homeSnippetTitle}</p>
+                <p className="text-sm text-muted-foreground line-clamp-2">
+                  {draft.site.defaultMetaDescription}
+                </p>
+              </div>
+              <div className="rounded-xl border border-border p-4">
+                <p className="text-xs font-semibold mb-3">Apercu Google - Blog</p>
+                <p className="text-sm text-blue-700 truncate">{siteBaseUrl}/blog</p>
+                <p className="text-lg text-[#1a0dab] leading-snug">{blogSnippetTitle}</p>
+                <p className="text-sm text-muted-foreground line-clamp-2">
+                  {draft.blog.seoDescription}
+                </p>
+              </div>
             </div>
           </div>
         </div>

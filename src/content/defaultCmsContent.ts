@@ -26,6 +26,7 @@ export type CmsContent = {
     companyName: string;
     tabTitle: string;
     defaultMetaDescription: string;
+    siteUrl: string;
     ogImage: string;
     logoPath: string;
     faviconPath: string;
@@ -196,6 +197,7 @@ export const defaultCmsContent: CmsContent = {
     tabTitle: "AKConseil",
     defaultMetaDescription:
       "AKConseil : accompagnement educatif, social et professionnel sur-mesure.",
+    siteUrl: "https://akconseil.fr",
     ogImage: "/logo-akc.svg",
     logoPath: "/logo-akc.svg",
     faviconPath: "/favicon.ico",

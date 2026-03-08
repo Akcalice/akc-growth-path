@@ -51,13 +51,15 @@ const Layout = ({ children }: { children: ReactNode }) => {
     title: content.site.tabTitle,
     description: content.site.defaultMetaDescription,
   };
+  const siteBaseUrl = content.site.siteUrl || "https://akconseil.fr";
+  const logoUrl = new URL(content.site.logoPath, siteBaseUrl).toString();
 
   const organizationStructuredData = {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: content.site.companyName,
-    url: "https://akconseil.fr",
-    logo: "https://akconseil.fr/logo-akc.svg",
+    url: siteBaseUrl,
+    logo: logoUrl,
     email: content.site.contactEmail,
   };
 
@@ -94,6 +96,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
           title={seoData.title}
           description={seoData.description}
           canonicalPath={location.pathname}
+          baseUrl={siteBaseUrl}
           image={content.site.ogImage}
           type="website"
           keywords={[

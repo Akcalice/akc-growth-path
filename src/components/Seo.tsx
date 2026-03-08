@@ -4,6 +4,7 @@ type SeoProps = {
   title: string;
   description: string;
   canonicalPath?: string;
+  baseUrl?: string;
   image?: string;
   type?: "website" | "article";
   keywords?: string[];
@@ -13,7 +14,14 @@ type SeoProps = {
   structuredData?: Record<string, unknown>;
 };
 
-const getBaseUrl = () => {
+const getBaseUrl = (configuredBaseUrl?: string) => {
+  if (configuredBaseUrl) {
+    try {
+      return new URL(configuredBaseUrl).origin;
+    } catch {
+      // ignore invalid configured url
+    }
+  }
   if (typeof window !== "undefined" && window.location.origin) {
     return window.location.origin;
   }
@@ -72,6 +80,7 @@ const Seo = ({
   title,
   description,
   canonicalPath = "/",
+  baseUrl,
   image = "/logo-akc.svg",
   type = "website",
   keywords = [],
@@ -81,9 +90,9 @@ const Seo = ({
   structuredData,
 }: SeoProps) => {
   useEffect(() => {
-    const baseUrl = getBaseUrl();
-    const canonicalUrl = new URL(canonicalPath, baseUrl).toString();
-    const imageUrl = new URL(image, baseUrl).toString();
+    const resolvedBaseUrl = getBaseUrl(baseUrl);
+    const canonicalUrl = new URL(canonicalPath, resolvedBaseUrl).toString();
+    const imageUrl = new URL(image, resolvedBaseUrl).toString();
 
     document.title = title;
 
@@ -125,6 +134,7 @@ const Seo = ({
     title,
     description,
     canonicalPath,
+    baseUrl,
     image,
     type,
     keywords,

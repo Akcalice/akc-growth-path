@@ -38,7 +38,7 @@ const normalizeHeaderValue = (value: string | string[] | undefined) =>
 
 type ApiRequest = {
   method?: string;
-  headers: Record<string, string | string[] | undefined>;
+  headers?: Record<string, string | string[] | undefined>;
   body?: unknown;
 };
 
@@ -68,8 +68,15 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
   }
 
   if (req.method === "PUT") {
-    const session = getSessionFromRequest(req);
-    const providedPassword = normalizeHeaderValue(req.headers["x-admin-password"])?.trim();
+    const headers = req.headers || {};
+    let session = null;
+    try {
+      session = getSessionFromRequest(req);
+    } catch {
+      session = null;
+    }
+
+    const providedPassword = normalizeHeaderValue(headers["x-admin-password"])?.trim();
     const expectedPassword = process.env.ADMIN_LOGIN_PASSWORD?.trim();
     const isPasswordAuthorized =
       Boolean(expectedPassword) && Boolean(providedPassword) && providedPassword === expectedPassword;
@@ -81,15 +88,24 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
       });
     }
 
-    const githubToken = process.env.CMS_GITHUB_TOKEN;
+    const githubToken =
+      process.env.CMS_GITHUB_TOKEN?.trim() ||
+      process.env.GITHUB_TOKEN?.trim() ||
+      process.env.GH_TOKEN?.trim();
     if (!githubToken) {
       return res.status(500).json({
-        error: "La variable CMS_GITHUB_TOKEN est manquante sur Vercel.",
+        error:
+          "Token GitHub manquant. Ajoutez CMS_GITHUB_TOKEN (ou GITHUB_TOKEN) sur Vercel pour publier.",
       });
     }
 
     try {
-      const payload = parseJsonBody(req.body);
+      let payload: Record<string, unknown>;
+      try {
+        payload = parseJsonBody(req.body);
+      } catch {
+        return res.status(400).json({ error: "Le corps de la requete doit etre un JSON valide." });
+      }
       const content = payload.content;
 
       if (!content || typeof content !== "object") {
