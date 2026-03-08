@@ -23,8 +23,8 @@ const Index = () => {
   const { content } = useCmsContent();
   const home = content.home;
   const calendlyUrl = content.site.calendlyUrl;
-  const logoPath = "/logo-akc.svg";
-  const logoSrc = `${logoPath}${logoPath.includes("?") ? "&" : "?"}v=11`;
+  const logoPath = content.site.logoPath || "/logo-akc.svg";
+  const logoSrc = `${logoPath}${logoPath.includes("?") ? "&" : "?"}v=13`;
 
   return (
     <Layout>

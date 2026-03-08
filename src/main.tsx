@@ -8,8 +8,8 @@ const mainFavicon =
   (document.querySelector('link[rel="icon"]') as HTMLLinkElement | null) ??
   (document.createElement("link") as HTMLLinkElement);
 mainFavicon.setAttribute("rel", "icon");
-mainFavicon.setAttribute("type", "image/svg+xml");
-mainFavicon.href = "/favicon-akconseil.svg?v=11";
+mainFavicon.setAttribute("type", "image/x-icon");
+mainFavicon.href = "/favicon.ico?v=13";
 if (!mainFavicon.parentElement) {
   document.head.appendChild(mainFavicon);
 }
