@@ -12,7 +12,7 @@ import {
 export default async function handler(req: ApiRequest, res: ApiResponse) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
-    return res.status(405).json({ error: "Methode non autorisee." });
+    return res.status(405).json({ error: "Méthode non autorisée." });
   }
 
   const {
@@ -25,13 +25,13 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
   if (!adminEmail || !adminPassword || !secret) {
     return res.status(500).json({
       error:
-        "Configuration admin incomplete. Definir ADMIN_LOGIN_EMAIL, ADMIN_LOGIN_PASSWORD et ADMIN_AUTH_SECRET.",
+        "Configuration admin incomplète. Définir ADMIN_LOGIN_EMAIL, ADMIN_LOGIN_PASSWORD et ADMIN_AUTH_SECRET.",
     });
   }
   if (!resendApiKey || !resendFromEmail) {
     return res.status(500).json({
       error:
-        "Configuration email admin incomplete. Definir RESEND_API_KEY et RESEND_FROM_EMAIL.",
+        "Configuration email admin incomplète. Définir RESEND_API_KEY et RESEND_FROM_EMAIL.",
     });
   }
 
@@ -62,8 +62,8 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     const resend = new Resend(resendApiKey);
     const html = `
       <h2>Validation de connexion AKConseil</h2>
-      <p>Une tentative de connexion au backoffice vient d'etre effectuee.</p>
-      <p>Cliquez sur ce lien pour valider votre acces :</p>
+      <p>Une tentative de connexion au backoffice vient d’être effectuée.</p>
+      <p>Cliquez sur ce lien pour valider votre accès :</p>
       <p><a href="${verificationUrl}">${verificationUrl}</a></p>
       <p>Ce lien expire dans 15 minutes.</p>
     `;
@@ -71,8 +71,8 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     const text = [
       "Validation de connexion AKConseil",
       "",
-      "Une tentative de connexion au backoffice vient d'etre effectuee.",
-      "Validez votre acces via ce lien :",
+      "Une tentative de connexion au backoffice vient d’être effectuée.",
+      "Validez votre accès via ce lien :",
       verificationUrl,
       "",
       "Ce lien expire dans 15 minutes.",
@@ -93,7 +93,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     return res.status(200).json({
       success: true,
       message:
-        "Email de validation envoye. Cliquez sur le lien recu pour acceder au backoffice.",
+        "Email de validation envoyé. Cliquez sur le lien reçu pour accéder au backoffice.",
     });
   } catch (error) {
     const message =

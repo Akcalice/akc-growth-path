@@ -10,7 +10,7 @@ export type CmsBlogPost = {
   metaTitle: string;
   metaDescription: string;
   excerpt: string;
-  category: "Educatif" | "Insertion" | "Professionnel";
+  category: "Éducatif" | "Insertion" | "Professionnel";
   imageKey: string;
   imageAlt: string;
   publishedAt: string;
@@ -199,10 +199,10 @@ export const defaultCmsContent: CmsContent = {
     companyName: "AKConseil",
     tabTitle: "AKConseil",
     defaultMetaDescription:
-      "AKConseil : accompagnement educatif, social et professionnel sur-mesure.",
+      "AKConseil : accompagnement éducatif, social et professionnel sur-mesure.",
     siteUrl: "https://akconseil.fr",
-    ogImage: "/logo-akc-new.svg",
-    logoPath: "/logo-akc-new.svg",
+    ogImage: "/logo-akc.png",
+    logoPath: "/logo-akc.png",
     faviconPath: "/favicon.ico",
     calendlyUrl: "https://calendly.com/contact-akconseil/appel-d-offre",
     contactEmail: "contact@akconseil.fr",
@@ -213,7 +213,7 @@ export const defaultCmsContent: CmsContent = {
   navbar: {
     links: [
       { to: "/", label: "Accueil" },
-      { to: "/a-propos", label: "A Propos" },
+      { to: "/a-propos", label: "À propos" },
       { to: "/services", label: "Services" },
       { to: "/accompagnement", label: "Accompagnement" },
       { to: "/prix", label: "Prix" },
@@ -224,11 +224,11 @@ export const defaultCmsContent: CmsContent = {
   },
   footer: {
     description:
-      "Accompagnement educatif, social et professionnel sur-mesure. Aller au rythme de la personne accompagnee.",
+      "Accompagnement éducatif, social et professionnel sur-mesure. Aller au rythme de la personne accompagnée.",
     navigationTitle: "Navigation",
     navigationLinks: [
       { to: "/", label: "Accueil" },
-      { to: "/a-propos", label: "A Propos" },
+      { to: "/a-propos", label: "À propos" },
       { to: "/services", label: "Services" },
       { to: "/accompagnement", label: "Accompagnement" },
       { to: "/blog", label: "Blog" },
@@ -236,81 +236,81 @@ export const defaultCmsContent: CmsContent = {
     contactTitle: "Contact",
     appointmentTitle: "Prendre RDV",
     appointmentDescription:
-      "Reservez une consultation personnalisee pour demarrer votre accompagnement.",
+      "Réservez une consultation personnalisée pour démarrer votre accompagnement.",
     appointmentCtaLabel: "Reserver",
-    copyrightText: "Tous droits reserves.",
+    copyrightText: "Tous droits réservés.",
   },
   home: {
-    heroBadge: "Consultante experte (+25 ans d'experiences)",
+    heroBadge: "Consultante experte (+25 ans d’expérience)",
     heroTitleLine1: "L'aide qu'il vous faut,",
     heroTitleLine2: "au moment juste.",
     heroDescription:
       "Parce que chaque parcours est unique, notre accompagnement l'est aussi.",
     heroPrimaryCta: "Prendre Rendez-vous",
-    heroSecondaryCta: "Decouvrir nos services",
-    introTitle: "Accompagnement educatif, social et professionnel sur-mesure.",
+    heroSecondaryCta: "Découvrir nos services",
+    introTitle: "Accompagnement éducatif, social et professionnel sur-mesure.",
     introDescription:
-      "Un accompagnement complet a travers des formations, des ateliers pratiques et des conseils sur-mesure, dedies aux femmes, aux familles et aux structures professionnelles.",
+      "Un accompagnement complet à travers des formations, des ateliers pratiques et des conseils sur-mesure, dédiés aux femmes, aux familles et aux structures professionnelles.",
     services: [
       {
-        title: "Accompagnement educatif",
+        title: "Accompagnement éducatif",
         description:
-          "Orientation, ecoute attentive et soutien dans la gestion de situations complexes : education, developpement personnel et equilibre familial.",
+          "Orientation, écoute attentive et soutien dans la gestion de situations complexes : éducation, développement personnel et équilibre familial.",
         imageKey: "counselingEducationPhoto",
       },
       {
         title: "Insertion & orientation",
         description:
-          "Ateliers cibles et temps d'echange pour definir un projet clair, valoriser vos competences et reprendre confiance en votre parcours.",
+          "Ateliers ciblés et temps d’échange pour définir un projet clair, valoriser vos compétences et reprendre confiance en votre parcours.",
         imageKey: "orientationCareerPhoto",
       },
       {
         title: "Coaching professionnel",
         description:
-          "Formations et ateliers pratiques pour booster la confiance, atteindre ses objectifs, renforcer la cohesion et encourager l'autonomie.",
+          "Formations et ateliers pratiques pour booster la confiance, atteindre ses objectifs, renforcer la cohésion et encourager l’autonomie.",
         imageKey: "booksHero",
       },
     ],
-    howItWorksTitle: "Comment ca marche",
+    howItWorksTitle: "Comment ça marche",
     steps: [
       {
         num: "1",
         title: "Diagnostic",
-        text: "Commencez par identifier vos besoins grace a un diagnostic simple et rapide. Je cerne vos attentes et repere les axes prioritaires.",
+        text: "Commencez par identifier vos besoins grâce à un diagnostic simple et rapide. Je cerne vos attentes et repère les axes prioritaires.",
       },
       {
         num: "2",
         title: "Accompagnement",
-        text: "Recevez un accompagnement personnalise : conseils, ateliers pratiques ou coaching adapte a votre profil.",
+        text: "Recevez un accompagnement personnalisé : conseils, ateliers pratiques ou coaching adapté à votre profil.",
       },
       {
         num: "3",
-        title: "Evolution",
-        text: "Suivez votre evolution etape par etape. Je vous aide a garder le cap, a rester motive et a mesurer vos progres.",
+        title: "Évolution",
+        text: "Suivez votre évolution étape par étape. Je vous aide à garder le cap, à rester motivé et à mesurer vos progrès.",
       },
     ],
     whyTitle: "Pourquoi faire appel a AKConseil ?",
-    whySubtitle: "Une approche humaine et engagee",
+    whySubtitle: "Une approche humaine et engagée",
     whyTagline: "Parce que vous n'etes pas seul",
     whyCardTitle: "Un cadre bienveillant, sans jugement",
-    whyCtaLabel: "Votre evolution commence ici",
+    whyCtaLabel: "Votre évolution commence ici",
     whyImageKey: "communitySunset",
     testimonialsTitle: "Nos Avis clients",
     testimonials: [
       {
-        text: "AKConseil a su m'accompagner avec une grande justesse, a un moment ou j'avais besoin de recul et de clarte.\nAccompagnement a la creation de mon entreprise.\nTres professionnelle.\nExplication claire.\nEtape par etape avec beaucoup de bienveillance.",
+        text: "AKConseil a su m’accompagner avec une grande justesse, à un moment où j’avais besoin de recul et de clarté.\nAccompagnement à la création de mon entreprise.\nTrès professionnelle.\nExplication claire.\nÉtape par étape avec beaucoup de bienveillance.",
         name: "Jeanne",
         sessions: "4 sessions",
         stars: 5,
       },
       {
-        text: "Grace a l'accompagnement personnalise, j'ai pu retrouver confiance en moi et construire un projet professionnel solide. C'etait excellent !!!",
+        text: "Grâce à l’accompagnement personnalisé, j’ai pu retrouver confiance en moi et construire un projet professionnel solide. C’était excellent !",
         name: "Anne C.",
         sessions: "10 sessions",
         stars: 5,
       },
       {
-        text: "Un cadre bienveillant et sans jugement qui m'a permis d'avancer sereinement dans ma reconversion.",
+        text: "Un cadre bienveillant et sans jugement qui m’a permis d’avancer sereinement dans ma reconversion.",
         name: "Sophie",
         sessions: "12 sessions",
         stars: 5,
@@ -318,18 +318,18 @@ export const defaultCmsContent: CmsContent = {
     ],
     faqTitle: "Foire Aux Questions",
     faqDescription:
-      "Si vous ne trouvez pas ce que vous cherchez, n'hesitez pas a nous contacter.",
+      "Si vous ne trouvez pas ce que vous cherchez, n’hésitez pas à nous contacter.",
     faqItems: [
       {
-        q: "A qui s'adresse nos accompagnements ?",
+        q: "À qui s’adressent nos accompagnements ?",
         a: "Nos accompagnements s'adressent aux femmes, aux familles, aux jeunes en recherche d'orientation, ainsi qu'aux entreprises et structures souhaitant renforcer leurs equipes.",
       },
       {
-        q: "Comment reserver un rendez-vous ?",
+        q: "Comment réserver un rendez-vous ?",
         a: "Vous pouvez reserver directement via notre page de prise de rendez-vous en ligne ou nous contacter par email a contact@akconseil.fr.",
       },
       {
-        q: "A qui s'adresse l'accompagnement ?",
+        q: "À qui s’adresse l’accompagnement ?",
         a: "L'accompagnement s'adresse a toute personne souhaitant evoluer sur le plan educatif, social ou professionnel, qu'elle soit particulier ou au sein d'une structure.",
       },
       {
@@ -350,25 +350,25 @@ export const defaultCmsContent: CmsContent = {
       },
     ],
     faqCtaLabel: "Contactez-nous",
-    finalCtaTitle: "Pret·e a avancer ?",
+    finalCtaTitle: "Prêt·e à avancer ?",
     finalCtaDescription:
-      "Reservez votre premier rendez-vous et commencez votre accompagnement personnalise.",
+      "Réservez votre premier rendez-vous et commencez votre accompagnement personnalisé.",
     finalCtaLabel: "Prendre Rendez-vous",
   },
   about: {
-    badge: "A propos",
-    title: "Une consultante engagee a vos cotes",
+    badge: "À propos",
+    title: "Une consultante engagée à vos côtés",
     paragraph1:
-      "Fondatrice d'AKC Gestion Conseils, je suis consultante experte avec plus de 25 ans d'experience dans l'accompagnement educatif, l'insertion et le developpement professionnel.",
+      "Fondatrice d’AKC Gestion Conseils, je suis consultante experte avec plus de 25 ans d’expérience dans l’accompagnement éducatif, l’insertion et le développement professionnel.",
     paragraph2:
-      "Ma philosophie : Aller au rythme de la personne accompagnee. Chaque parcours est unique, et mon approche humaine et personnalisee permet a chacun de devenir acteur de son evolution. Je travaille aupres des femmes, des familles, des jeunes et des structures professionnelles pour offrir un accompagnement complet et bienveillant.",
+      "Ma philosophie : aller au rythme de la personne accompagnée. Chaque parcours est unique, et mon approche humaine et personnalisée permet à chacun de devenir acteur de son évolution. Je travaille auprès des femmes, des familles, des jeunes et des structures professionnelles pour offrir un accompagnement complet et bienveillant.",
     ctaLabel: "Prendre Rendez-vous",
-    portraitImageKey: "/logo-akc-new.svg",
-    methodologyTitle: "Ma methodologie",
+    portraitImageKey: "consultantPortrait",
+    methodologyTitle: "Ma méthodologie",
     methodologyParagraph1:
-      "Mon approche repose sur l'ecoute active, l'analyse de la situation globale et la co-construction de solutions adaptees. Je combine formations, ateliers pratiques et conseils personnalises.",
+      "Mon approche repose sur l’écoute active, l’analyse de la situation globale et la co-construction de solutions adaptées. Je combine formations, ateliers pratiques et conseils personnalisés.",
     methodologyParagraph2:
-      "Que vous soyez un particulier en quete de reperes ou une entreprise souhaitant renforcer ses equipes, je m'engage a vous accompagner avec respect, professionnalisme et engagement.",
+      "Que vous soyez un particulier en quête de repères ou une entreprise souhaitant renforcer ses équipes, je m’engage à vous accompagner avec respect, professionnalisme et engagement.",
     methodologyImageKey: "booksStudy",
     valuesTitle: "Nos valeurs",
     values: [
@@ -386,7 +386,7 @@ export const defaultCmsContent: CmsContent = {
       },
       {
         title: "Expertise",
-        text: "Plus de 25 ans d'experience dans l'accompagnement educatif et professionnel.",
+        text: "Plus de 25 ans d’expérience dans l’accompagnement éducatif et professionnel.",
       },
     ],
   },
@@ -415,7 +415,7 @@ export const defaultCmsContent: CmsContent = {
       {
         title: "Coaching professionnel",
         description:
-          "Formations et ateliers pratiques pour booster la confiance, atteindre ses objectifs, renforcer la cohesion et encourager l'autonomie.",
+          "Formations et ateliers pratiques pour booster la confiance, atteindre ses objectifs, renforcer la cohésion et encourager l’autonomie.",
         forWho: "Entreprises, structures, professionnels",
         imageKey: "illusCoaching",
         learnMoreLabel: "En savoir plus",
@@ -429,7 +429,7 @@ export const defaultCmsContent: CmsContent = {
       },
       {
         title: "Entreprises & Institutions",
-        text: "Formations sur-mesure, ateliers collectifs et coaching d'equipe.",
+        text: "Formations sur-mesure, ateliers collectifs et coaching d’équipe.",
       },
     ],
     ctaTitle: "Contactez-nous pour un devis sur-mesure",
@@ -474,7 +474,7 @@ export const defaultCmsContent: CmsContent = {
         items: [
           "Coaching individuel",
           "Formation en entreprise",
-          "Ateliers de cohesion d'equipe",
+          "Ateliers de cohésion d’équipe",
           "Developpement du leadership",
           "Gestion du stress",
         ],
@@ -486,10 +486,10 @@ export const defaultCmsContent: CmsContent = {
   pricingPage: {
     title: "Tarifs & forfaits",
     intro:
-      "Seances individuelles, suivis personnalises, ateliers & offres entreprises.",
+      "Séances individuelles, suivis personnalisés, ateliers & offres entreprises.",
     plans: [
       {
-        title: "Seance de suivi",
+        title: "Séance de suivi",
         price: "60€",
         featured: true,
         features: ["Session 1h", "Suivi progressif", "Objectifs sur-mesure"],
@@ -497,16 +497,16 @@ export const defaultCmsContent: CmsContent = {
         ctaLink: "https://calendly.com/contact-akconseil/appel-d-offre",
       },
       {
-        title: "Seance initiale",
+        title: "Séance initiale",
         price: "90€",
         featured: false,
         features: [
           "Entretien 1h30 complet",
-          "Bilan personnalise",
-          "Conseils adaptes + suivi",
+          "Bilan personnalisé",
+          "Conseils adaptés + suivi",
         ],
         ctaLabel: "Prendre RDV",
-        ctaLink: "https://calendly.com/contact-akconseil/appel-d-offre",
+        ctaLink: "https://calendly.com/contact-akconseil/seance-initiale",
       },
       {
         title: "Ateliers & Entreprises",
@@ -514,11 +514,11 @@ export const defaultCmsContent: CmsContent = {
         featured: false,
         features: [
           "Session 3h (10 pers. max)",
-          "Programme adapte/collectif",
-          "Supports pedagogiques inclus",
+          "Programme adapté/collectif",
+          "Supports pédagogiques inclus",
         ],
         ctaLabel: "Prendre RDV",
-        ctaLink: "https://calendly.com/contact-akconseil/appel-d-offre",
+        ctaLink: "https://calendly.com/contact-akconseil/ateliers-entreprises",
       },
       {
         title: "Ateliers & Entreprises",
@@ -527,21 +527,21 @@ export const defaultCmsContent: CmsContent = {
         features: [
           "Session 3h (10 pers. max)",
           "Forfaits semaines/mois",
-          "Programme adapte/collectif",
+          "Programme adapté/collectif",
         ],
         ctaLabel: "Demander un devis",
         ctaLink: "/contact",
       },
     ],
-    ctaTitle: "Besoin d'une offre personnalisee ?",
+    ctaTitle: "Besoin d’une offre personnalisée ?",
     ctaDescription:
-      "Contactez-nous pour un devis sur-mesure adapte a vos besoins specifiques.",
+      "Contactez-nous pour un devis sur-mesure adapté à vos besoins spécifiques.",
     ctaLabel: "Contactez-nous",
     ctaLink: "/contact",
   },
   rendezVousPage: {
     badge: "Prise de Rendez-vous",
-    title: "Reservez votre consultation",
+    title: "Réservez votre consultation",
     intro:
       "Choisissez la formule qui vous convient et demarrez votre accompagnement personnalise.",
     options: [
@@ -572,13 +572,13 @@ export const defaultCmsContent: CmsContent = {
       },
       {
         title: "Forfait accompagnement",
-        duration: "5 seances",
+        duration: "5 séances",
         price: "Sur devis",
         description: "Un parcours complet pour un accompagnement en profondeur.",
         features: [
           "Programme sur-mesure",
           "Suivi regulier",
-          "Support entre les seances",
+          "Support entre les séances",
         ],
         ctaLabel: "Reserver",
         ctaLink: "https://calendly.com/contact-akconseil/appel-d-offre",
@@ -696,7 +696,7 @@ export const defaultCmsContent: CmsContent = {
           {
             heading: "5) Coordonner les adultes autour du jeune",
             paragraphs: [
-              "Parents, equipe pedagogique et accompagnant doivent partager une vision commune. Quand les messages sont coherents, l'adolescent se sent cadre et soutenu.",
+              "Parents, équipe pédagogique et accompagnant doivent partager une vision commune. Quand les messages sont cohérents, l’adolescent se sent cadré et soutenu.",
               "Des points de suivi reguliers permettent d'ajuster le plan sans dramatiser chaque contretemps.",
             ],
           },
@@ -801,19 +801,19 @@ export const defaultCmsContent: CmsContent = {
         metaTitle:
           "Coaching en entreprise : 5 leviers de performance durable | AKC Gestion Conseils",
         metaDescription:
-          "Comment le coaching en entreprise ameliore cohesion, leadership, communication et engagement des equipes de maniere durable.",
+          "Comment le coaching en entreprise améliore cohésion, leadership, communication et engagement des équipes de manière durable.",
         excerpt:
-          "Le coaching en entreprise n'est pas un luxe : c'est un levier concret pour aligner performance, cohesion et qualite de vie au travail.",
+          "Le coaching en entreprise n’est pas un luxe : c’est un levier concret pour aligner performance, cohésion et qualité de vie au travail.",
         category: "Professionnel",
         imageKey: "illusCoaching",
-        imageAlt: "Atelier de coaching en entreprise pour renforcer la cohesion",
+        imageAlt: "Atelier de coaching en entreprise pour renforcer la cohésion",
         publishedAt: "2026-03-01",
         updatedAt: "2026-03-01",
         readingTime: "7 min",
         author: "AKC Gestion Conseils",
         keywords: [
           "coaching entreprise",
-          "cohesion equipe",
+          "cohésion équipe",
           "leadership",
           "qualite de vie au travail",
           "accompagnement professionnel",
@@ -822,14 +822,14 @@ export const defaultCmsContent: CmsContent = {
           {
             heading: "Le coaching en entreprise : pour quoi faire concretement ?",
             paragraphs: [
-              "Le coaching aide les equipes et les managers a mieux cooperer, prendre des decisions plus claires et mieux gerer les tensions du quotidien.",
+              "Le coaching aide les équipes et les managers à mieux coopérer, prendre des décisions plus claires et mieux gérer les tensions du quotidien.",
               "L'enjeu n'est pas seulement humain : c'est aussi un impact direct sur la productivite, la retention des talents et la qualite du service.",
             ],
           },
           {
             heading: "Levier 1 : clarifier les roles et responsabilites",
             paragraphs: [
-              "Beaucoup de frictions viennent d'attentes implicites. Clarifier qui fait quoi, avec quels objectifs et quels indicateurs, fluidifie le fonctionnement de l'equipe.",
+              "Beaucoup de frictions viennent d’attentes implicites. Clarifier qui fait quoi, avec quels objectifs et quels indicateurs, fluidifie le fonctionnement de l’équipe.",
             ],
           },
           {
@@ -853,7 +853,7 @@ export const defaultCmsContent: CmsContent = {
           {
             heading: "Levier 5 : installer une culture de progression continue",
             paragraphs: [
-              "Une equipe performante apprend en continu. Avec des objectifs trimestriels, des retours d'experience et des plans d'action courts, les progres deviennent visibles et durables.",
+              "Une équipe performante apprend en continu. Avec des objectifs trimestriels, des retours d’expérience et des plans d’action courts, les progrès deviennent visibles et durables.",
             ],
           },
           {

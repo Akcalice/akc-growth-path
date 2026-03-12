@@ -30,7 +30,7 @@ const VisualEditorToolbar = () => {
       <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[9999] w-[min(96vw,820px)] bg-background border border-border shadow-xl rounded-2xl px-4 py-3">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <p className="text-xs md:text-sm font-semibold">
-            Mode edition protege : connectez-vous pour modifier le site.
+            Mode édition protégé : connectez-vous pour modifier le site.
           </p>
           <a
             href={loginUrl}
@@ -51,8 +51,8 @@ const VisualEditorToolbar = () => {
     try {
       await saveContent();
       toast({
-        title: "Modifications publiees",
-        description: "Les changements visuels ont ete sauvegardes dans le site.",
+        title: "Modifications publiées",
+        description: "Les changements visuels ont été sauvegardés dans le site.",
       });
     } catch (error) {
       toast({
@@ -66,13 +66,16 @@ const VisualEditorToolbar = () => {
   return (
     <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[9999] w-[min(96vw,900px)] bg-background border border-border shadow-xl rounded-2xl px-3 py-3 md:px-4 md:py-3">
       <div className="flex flex-col md:flex-row gap-3 md:items-center">
-        <div className="text-xs md:text-sm font-semibold">Mode edition visuelle actif</div>
+        <div className="text-xs md:text-sm font-semibold">Mode édition visuelle actif</div>
+        <div className="flex-1 text-[11px] md:text-xs text-muted-foreground">
+          Survolez un texte ou une image puis utilisez les actions affichées.
+        </div>
         <input
           type="password"
           value={adminPassword}
           onChange={(event) => setAdminPassword(event.target.value)}
-          placeholder="Mot de passe admin pour publier"
-          className="flex-1 px-3 py-2 rounded-lg border border-border bg-background text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+          placeholder="Mot de passe admin (optionnel) pour publier"
+          className="w-full md:w-[280px] px-3 py-2 rounded-lg border border-border bg-background text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-ring"
         />
         <div className="flex items-center gap-2 flex-wrap">
           <button
@@ -95,7 +98,7 @@ const VisualEditorToolbar = () => {
             onClick={() => void logout()}
             className="px-4 py-2 rounded-full bg-secondary text-secondary-foreground text-xs md:text-sm font-semibold hover:bg-secondary/90 transition-colors"
           >
-            Deconnexion
+            Déconnexion
           </button>
         </div>
       </div>

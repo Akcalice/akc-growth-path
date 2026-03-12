@@ -49,10 +49,10 @@ const Contact = () => {
 
       if (payload.queued) {
         toast({
-          title: "Message enregistre",
+          title: "Message enregistré",
           description:
             payload.warning ||
-            "Votre message est bien enregistre mais l'email n'a pas encore pu etre envoye.",
+            "Votre message est bien enregistré, mais l’email n’a pas encore pu être envoyé.",
         });
       } else {
         toast({

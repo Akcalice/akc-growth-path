@@ -2,6 +2,24 @@ import { Resend } from "resend";
 import nodemailer from "nodemailer";
 import { MongoClient } from "mongodb";
 
+const DEFAULT_OWNER = "Akcalice";
+const DEFAULT_REPO = "akcsite";
+const DEFAULT_BRANCH = "main";
+const DEFAULT_SUBMISSIONS_FILE_PATH = "contact-submissions.json";
+
+const resolveGithubConfig = () => ({
+  owner: process.env.CMS_GITHUB_OWNER || DEFAULT_OWNER,
+  repo: process.env.CMS_GITHUB_REPO || DEFAULT_REPO,
+  branch: process.env.CMS_GITHUB_BRANCH || DEFAULT_BRANCH,
+  filePath: process.env.CONTACT_SUBMISSIONS_FILE_PATH || DEFAULT_SUBMISSIONS_FILE_PATH,
+});
+
+const buildGithubContentsApiUrl = () => {
+  const { owner, repo, filePath } = resolveGithubConfig();
+  const encodedPath = filePath.split("/").map(encodeURIComponent).join("/");
+  return `https://api.github.com/repos/${owner}/${repo}/contents/${encodedPath}`;
+};
+
 type ApiRequest = {
   method?: string;
   body?: unknown;
@@ -54,10 +72,87 @@ const queueSubmission = (submission: Record<string, unknown>) => {
   return queued.queueId as string;
 };
 
+type ContactSubmission = {
+  id: string;
+  createdAt: string;
+  name: string;
+  email: string;
+  phone?: string | null;
+  service?: string | null;
+  subject: string;
+  message: string;
+};
+
+const safeJsonParseArray = (value: string): ContactSubmission[] => {
+  try {
+    const parsed = JSON.parse(value) as unknown;
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+    return parsed.filter(Boolean) as ContactSubmission[];
+  } catch {
+    return [];
+  }
+};
+
+const appendContactSubmission = async (submission: ContactSubmission) => {
+  const githubToken = process.env.CONTACT_SUBMISSIONS_GITHUB_TOKEN || process.env.CMS_GITHUB_TOKEN;
+  if (!githubToken) {
+    // On n’empêche pas l’envoi d’email si le stockage backoffice est indisponible.
+    return;
+  }
+
+  const { branch } = resolveGithubConfig();
+  const apiUrl = `${buildGithubContentsApiUrl()}?ref=${encodeURIComponent(branch)}`;
+
+  let existingSha: string | undefined;
+  let existingItems: ContactSubmission[] = [];
+
+  const existingResponse = await fetch(apiUrl, {
+    headers: {
+      Authorization: `Bearer ${githubToken}`,
+      Accept: "application/vnd.github+json",
+    },
+  });
+
+  if (existingResponse.ok) {
+    const payload = (await existingResponse.json()) as {
+      sha?: string;
+      content?: string;
+      encoding?: string;
+    };
+    existingSha = payload.sha;
+    if (payload.encoding === "base64" && typeof payload.content === "string") {
+      const decoded = Buffer.from(payload.content, "base64").toString("utf8");
+      existingItems = safeJsonParseArray(decoded);
+    }
+  } else if (existingResponse.status !== 404) {
+    return;
+  }
+
+  const nextItems = [submission, ...existingItems].slice(0, 500);
+  const updatedFileContent = `${JSON.stringify(nextItems, null, 2)}\n`;
+
+  await fetch(buildGithubContentsApiUrl(), {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${githubToken}`,
+      Accept: "application/vnd.github+json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      message: "chore(contact): store contact form submission",
+      content: Buffer.from(updatedFileContent, "utf8").toString("base64"),
+      branch,
+      sha: existingSha,
+    }),
+  }).catch(() => undefined);
+};
+
 export default async function handler(req: ApiRequest, res: ApiResponse) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
-    return res.status(405).json({ error: "Methode non autorisee." });
+    return res.status(405).json({ error: "Méthode non autorisée." });
   }
 
   try {
@@ -90,6 +185,17 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
       submittedAt,
       status: "new",
     };
+
+    void appendContactSubmission({
+      id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      createdAt: submittedAt.toISOString(),
+      name,
+      email,
+      phone: phone || null,
+      service: service || null,
+      subject,
+      message,
+    });
 
     let dbId: string | null = null;
     const mongoUri = process.env.MONGODB_URI?.trim();

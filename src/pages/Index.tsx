@@ -19,8 +19,8 @@ const Index = () => {
   const { content } = useCmsContent();
   const home = content.home;
   const calendlyUrl = content.site.calendlyUrl;
-  const logoPath = content.site.logoPath || "/logo-akc-new.svg";
-  const logoSrc = `${logoPath}${logoPath.includes("?") ? "&" : "?"}v=14`;
+  const logoPath = content.site.logoPath || "/logo-akc.png";
+  const logoSrc = `${logoPath}${logoPath.includes("?") ? "&" : "?"}v=15`;
 
   return (
     <Layout>
@@ -296,7 +296,7 @@ const Index = () => {
                   <EditableArrayActions
                     arrayPath="home.faqItems"
                     index={index}
-                    createItem={() => ({ q: "Nouvelle question", a: "Nouvelle reponse" })}
+                    createItem={() => ({ q: "Nouvelle question", a: "Nouvelle réponse" })}
                   />
                 </div>
               </AccordionContent>
@@ -311,7 +311,7 @@ const Index = () => {
         <div className="text-center mt-4">
           <EditableArrayActions
             arrayPath="home.faqItems"
-            createItem={() => ({ q: "Nouvelle question", a: "Nouvelle reponse" })}
+            createItem={() => ({ q: "Nouvelle question", a: "Nouvelle réponse" })}
             className="inline-flex"
           />
         </div>

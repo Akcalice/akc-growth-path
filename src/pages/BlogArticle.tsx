@@ -118,7 +118,7 @@ const BlogArticle = () => {
             <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
               <span className="inline-flex items-center gap-1.5">
                 <Calendar size={14} />
-                Publie le {formatBlogDate(article.publishedAt)}
+                Publié le {formatBlogDate(article.publishedAt)}
               </span>
               <span className="inline-flex items-center gap-1.5">
                 <Clock size={14} />

@@ -65,7 +65,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const faviconPath = content.site.faviconPath || "/favicon.ico";
-    const faviconVersion = "12";
+    const faviconVersion = "15";
     const faviconUrl = `${faviconPath}${faviconPath.includes("?") ? "&" : "?"}v=${faviconVersion}`;
 
     let icon = document.querySelector('link[rel="icon"]') as HTMLLinkElement | null;
@@ -74,7 +74,11 @@ const Layout = ({ children }: { children: ReactNode }) => {
       icon.rel = "icon";
       document.head.appendChild(icon);
     }
-    icon.setAttribute("type", faviconPath.endsWith(".svg") ? "image/svg+xml" : "image/x-icon");
+    if (faviconPath.endsWith(".svg")) {
+      icon.setAttribute("type", "image/svg+xml");
+    } else {
+      icon.setAttribute("type", "image/x-icon");
+    }
     icon.href = faviconUrl;
 
     let shortcut = document.querySelector('link[rel="shortcut icon"]') as HTMLLinkElement | null;

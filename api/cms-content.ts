@@ -7,6 +7,16 @@ const DEFAULT_BRANCH = "main";
 const DEFAULT_FILE_PATH = "cms-content.json";
 const LOCAL_FALLBACK_FILE_PATH = "/tmp/akconseil-cms-content.json";
 
+const base64EncodeUtf8 = (value: string) => {
+  if (typeof Buffer !== "undefined") {
+    return Buffer.from(value, "utf8").toString("base64");
+  }
+  if (typeof btoa !== "undefined") {
+    return btoa(unescape(encodeURIComponent(value)));
+  }
+  throw new Error("Encodage base64 indisponible dans cet environnement.");
+};
+
 const resolveConfig = () => ({
   owner: process.env.CMS_GITHUB_OWNER || DEFAULT_OWNER,
   repo: process.env.CMS_GITHUB_REPO || DEFAULT_REPO,
@@ -68,157 +78,164 @@ type ApiResponse = {
 };
 
 export default async function handler(req: ApiRequest, res: ApiResponse) {
-  if (req.method === "GET") {
-    try {
-      const localContent = await readLocalFallback();
-      if (localContent) {
-        return res.status(200).json(localContent);
-      }
-
-      const response = await fetch(buildRawContentUrl(), { cache: "no-store" });
-      if (!response.ok) {
-        return res.status(200).json({});
-      }
-      const text = await response.text();
-      if (!text.trim()) {
-        return res.status(200).json({});
-      }
-      return res.status(200).json(JSON.parse(text));
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Erreur de lecture du contenu CMS";
-      return res.status(200).json({ _warning: message });
-    }
-  }
-
-  if (req.method === "PUT") {
-    const headers = req.headers || {};
-    let session = null;
-    try {
-      session = getSessionFromRequest(req);
-    } catch {
-      session = null;
-    }
-
-    const providedPassword = normalizeHeaderValue(headers["x-admin-password"])?.trim();
-    const expectedPassword = process.env.ADMIN_LOGIN_PASSWORD?.trim();
-    const emergencyPassword = process.env.TEMP_ADMIN_PASSWORD?.trim() || "AKC-Temp-2026!";
-    const isPasswordAuthorized =
-      Boolean(providedPassword) &&
-      ((Boolean(expectedPassword) && providedPassword === expectedPassword) ||
-        providedPassword === emergencyPassword);
-
-    if (!session && !isPasswordAuthorized) {
-      return res.status(401).json({
-        error:
-          "Acces refuse. Connectez-vous au backoffice puis reessayez la publication.",
-      });
-    }
-
-    let payload: Record<string, unknown>;
-    try {
-      payload = parseJsonBody(req.body);
-    } catch {
-      return res.status(400).json({ error: "Le corps de la requete doit etre un JSON valide." });
-    }
-    const content = payload.content;
-
-    if (!content || typeof content !== "object") {
-      return res.status(400).json({ error: "Le JSON du contenu est invalide." });
-    }
-
-    const githubToken =
-      process.env.CMS_GITHUB_TOKEN?.trim() ||
-      process.env.GITHUB_TOKEN?.trim() ||
-      process.env.GH_TOKEN?.trim();
-    if (!githubToken) {
-      await writeLocalFallback(content as Record<string, unknown>);
-      return res.status(200).json({
-        success: true,
-        publishedTo: "local",
-        warning:
-          "Publication locale active: ajoutez CMS_GITHUB_TOKEN sur Vercel pour publier vers GitHub.",
-      });
-    }
-
-    try {
-      const { branch, filePath } = resolveConfig();
-      const apiUrl = `${buildGithubContentsApiUrl()}?ref=${encodeURIComponent(branch)}`;
-
-      let existingSha: string | undefined;
-      const existingResponse = await fetch(apiUrl, {
-        headers: {
-          Authorization: `Bearer ${githubToken}`,
-          Accept: "application/vnd.github+json",
-        },
-      });
-
-      if (existingResponse.ok) {
-        const existingFilePayload = (await existingResponse.json()) as { sha?: string };
-        existingSha = existingFilePayload.sha;
-      } else if (existingResponse.status !== 404) {
-        const errorBody = await existingResponse.text();
-        await writeLocalFallback(content as Record<string, unknown>);
-        return res.status(200).json({
-          success: true,
-          publishedTo: "local",
-          warning: `GitHub indisponible (${existingResponse.status}). Sauvegarde locale appliquee.`,
-          details: errorBody,
-        });
-      }
-
-      const updatedFileContent = `${JSON.stringify(content, null, 2)}\n`;
-      const updateResponse = await fetch(buildGithubContentsApiUrl(), {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${githubToken}`,
-          Accept: "application/vnd.github+json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          message: "chore(cms): update site content from backoffice",
-          content: Buffer.from(updatedFileContent, "utf8").toString("base64"),
-          branch,
-          sha: existingSha,
-        }),
-      });
-
-      if (!updateResponse.ok) {
-        const errorBody = await updateResponse.text();
-        await writeLocalFallback(content as Record<string, unknown>);
-        return res.status(200).json({
-          success: true,
-          publishedTo: "local",
-          warning: `Echec GitHub (${updateResponse.status}). Sauvegarde locale appliquee.`,
-          details: errorBody,
-        });
-      }
-
-      const updatePayload = await updateResponse.json();
-      await writeLocalFallback(content as Record<string, unknown>);
-      return res.status(200).json({
-        success: true,
-        publishedTo: "github",
-        filePath,
-        branch,
-        commitSha: updatePayload?.commit?.sha ?? null,
-      });
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Erreur inconnue lors de la publication CMS";
+  try {
+    if (req.method === "GET") {
       try {
+        const localContent = await readLocalFallback();
+        if (localContent) {
+          return res.status(200).json(localContent);
+        }
+
+        const response = await fetch(buildRawContentUrl(), { cache: "no-store" });
+        if (!response.ok) {
+          return res.status(200).json({});
+        }
+        const text = await response.text();
+        if (!text.trim()) {
+          return res.status(200).json({});
+        }
+        return res.status(200).json(JSON.parse(text));
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Erreur de lecture du contenu CMS";
+        return res.status(200).json({ _warning: message });
+      }
+    }
+
+    if (req.method === "PUT") {
+      const headers = req.headers || {};
+      let session = null;
+      try {
+        session = getSessionFromRequest(req as unknown as { headers: Record<string, unknown> });
+      } catch {
+        session = null;
+      }
+
+      const providedPassword = normalizeHeaderValue(headers["x-admin-password"])?.trim();
+      const expectedPassword = process.env.ADMIN_LOGIN_PASSWORD?.trim();
+      const emergencyPassword = process.env.TEMP_ADMIN_PASSWORD?.trim() || "AKC-Temp-2026!";
+      const isPasswordAuthorized =
+        Boolean(providedPassword) &&
+        ((Boolean(expectedPassword) && providedPassword === expectedPassword) ||
+          providedPassword === emergencyPassword);
+
+      if (!session && !isPasswordAuthorized) {
+        return res.status(401).json({
+          error:
+            "Accès refusé. Connectez-vous au backoffice puis réessayez la publication.",
+        });
+      }
+
+      let payload: Record<string, unknown>;
+      try {
+        payload = parseJsonBody(req.body);
+      } catch {
+        return res
+          .status(400)
+          .json({ error: "Le corps de la requête doit être un JSON valide." });
+      }
+      const content = payload.content;
+
+      if (!content || typeof content !== "object") {
+        return res.status(400).json({ error: "Le JSON du contenu est invalide." });
+      }
+
+      const githubToken =
+        process.env.CMS_GITHUB_TOKEN?.trim() ||
+        process.env.GITHUB_TOKEN?.trim() ||
+        process.env.GH_TOKEN?.trim();
+      if (!githubToken) {
         await writeLocalFallback(content as Record<string, unknown>);
         return res.status(200).json({
           success: true,
           publishedTo: "local",
-          warning: `Erreur GitHub: ${message}. Sauvegarde locale appliquee.`,
+          warning:
+            "Publication locale active : ajoutez CMS_GITHUB_TOKEN sur Vercel pour publier vers GitHub.",
         });
-      } catch {
-        return res.status(500).json({ error: message });
+      }
+
+      try {
+        const { branch, filePath } = resolveConfig();
+        const apiUrl = `${buildGithubContentsApiUrl()}?ref=${encodeURIComponent(branch)}`;
+
+        let existingSha: string | undefined;
+        const existingResponse = await fetch(apiUrl, {
+          headers: {
+            Authorization: `Bearer ${githubToken}`,
+            Accept: "application/vnd.github+json",
+          },
+        });
+
+        if (existingResponse.ok) {
+          const existingFilePayload = (await existingResponse.json()) as { sha?: string };
+          existingSha = existingFilePayload.sha;
+        } else if (existingResponse.status !== 404) {
+          const errorBody = await existingResponse.text();
+          await writeLocalFallback(content as Record<string, unknown>);
+          return res.status(200).json({
+            success: true,
+            publishedTo: "local",
+            warning: `GitHub indisponible (${existingResponse.status}). Sauvegarde locale appliquée.`,
+            details: errorBody,
+          });
+        }
+
+        const updatedFileContent = `${JSON.stringify(content, null, 2)}\n`;
+        const updateResponse = await fetch(buildGithubContentsApiUrl(), {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${githubToken}`,
+            Accept: "application/vnd.github+json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            message: "chore(cms): update site content from backoffice",
+            content: base64EncodeUtf8(updatedFileContent),
+            branch,
+            sha: existingSha,
+          }),
+        });
+
+        if (!updateResponse.ok) {
+          const errorBody = await updateResponse.text();
+          await writeLocalFallback(content as Record<string, unknown>);
+          return res.status(200).json({
+            success: true,
+            publishedTo: "local",
+            warning: `Échec GitHub (${updateResponse.status}). Sauvegarde locale appliquée.`,
+            details: errorBody,
+          });
+        }
+
+        const updatePayload = await updateResponse.json();
+        await writeLocalFallback(content as Record<string, unknown>);
+        return res.status(200).json({
+          success: true,
+          publishedTo: "github",
+          filePath,
+          branch,
+          commitSha: updatePayload?.commit?.sha ?? null,
+        });
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Erreur inconnue lors de la publication CMS";
+        try {
+          await writeLocalFallback(content as Record<string, unknown>);
+          return res.status(200).json({
+            success: true,
+            publishedTo: "local",
+            warning: `Erreur GitHub : ${message}. Sauvegarde locale appliquée.`,
+          });
+        } catch {
+          return res.status(500).json({ error: message });
+        }
       }
     }
-  }
 
-  res.setHeader("Allow", "GET, PUT");
-  return res.status(405).json({ error: "Methode non autorisee." });
+    res.setHeader("Allow", "GET, PUT");
+    return res.status(405).json({ error: "Méthode non autorisée." });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Erreur inconnue côté serveur.";
+    return res.status(500).json({ error: message });
+  }
 }
